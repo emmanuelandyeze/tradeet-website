@@ -46,7 +46,7 @@ const SectionOne = () => {
 					</div>
 				</div>
 				<div className="bg-[#F7FCE7] flex flex-row md:h-[50vh] h-[40vh] rounded-[20px] items-center px-0 w-full md:w-[70%] my-0">
-					<div className="z-50 relative flex flex-col items-center gap-2 top-16 left-12 md:-top-6 md:left-10">
+					<div className="z-20 relative flex flex-col items-center gap-2 top-16 left-12 md:-top-6 md:left-10">
 						<div className="flex flex-row items-center justify-between p-2 gap-2 w-[115%] rounded-[10px] bg-white">
 							<div className="flex flex-row gap-1 items-center">
 								<p className="text-xl">📦</p>
