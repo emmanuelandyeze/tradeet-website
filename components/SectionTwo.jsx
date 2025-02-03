@@ -5,7 +5,7 @@ import { GiDiamonds } from 'react-icons/gi';
 
 const SectionTwo = () => {
 	return (
-		<div className="flex flex-col md:flex-row max-w-7xl mx-auto md:gap-5 my-10 px-4 py-10">
+		<div className="flex flex-col md:flex-row max-w-7xl mx-auto gap-5 my-10 px-4 py-10">
 			<div className="bg-white rounded-[20px] px-6 py-8">
 				<p className="text-[#005d0f] font-[500]">
 					Get Customers to find you
@@ -16,7 +16,7 @@ const SectionTwo = () => {
 				<div className="flex flex-col gap-5 mt-8">
 					<div className="flex flex-row gap-2 items-start">
 						<GiDiamonds color="#00C853" size={40} />
-						<p>
+						<p className='md:w-[80%]'>
 							Promote your products to new audience beyond
 							your contacts
 						</p>
