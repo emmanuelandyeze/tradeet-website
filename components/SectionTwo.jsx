@@ -5,7 +5,7 @@ import { GiDiamonds } from 'react-icons/gi';
 
 const SectionTwo = () => {
 	return (
-		<div className="flex flex-col md:flex-row max-w-7xl mx-auto gap-10 my-10 px-4 py-10">
+		<div className="flex flex-col md:flex-row max-w-7xl mx-auto md:gap-5 my-10 px-4 py-10">
 			<div className="bg-white rounded-[20px] px-6 py-8">
 				<p className="text-[#005d0f] font-[500]">
 					Get Customers to find you

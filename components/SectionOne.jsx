@@ -45,8 +45,8 @@ const SectionOne = () => {
 						</button>
 					</div>
 				</div>
-				<div className="bg-[#F7FCE7] flex md:h-[50vh] h-[40vh] rounded-[20px] items-center px-4 w-full md:w-[70%] my-0">
-					<div className="z-50 relative flex flex-col items-center gap-2 top-6 left-1 md:-top-6 md:left-10">
+				<div className="bg-[#F7FCE7] flex flex-row md:h-[50vh] h-[40vh] rounded-[20px] items-center px-0 w-full md:w-[70%] my-0">
+					<div className="z-50 relative flex flex-col items-center gap-2 top-16 left-12 md:-top-6 md:left-10">
 						<div className="flex flex-row items-center justify-between p-2 gap-2 w-[115%] rounded-[10px] bg-white">
 							<div className="flex flex-row gap-1 items-center">
 								<p className="text-xl">📦</p>
@@ -94,7 +94,7 @@ const SectionOne = () => {
 					<img
 						src="https://s3-alpha-sig.figma.com/img/8949/7df9/1424c73e89eb94a3b4993d9fc2b37c2e?Expires=1739750400&Key-Pair-Id=APKAQ4GOSFWCW27IBOMQ&Signature=cJ0hZMfrKNUeJwl7A-NsmkjD9ZU-9ZGCFdPyadKILkFsK1bEPKQ7uOsfS4L89TtTkK86IgSxCky1kFXqy~wrBrcj6Z8CYJhjgv3ub7RgLbFSDMYxbnZWQJGkY89L98gFPLYG23iT7iKay2GQ8zybkk1-aYoiOnBcusU1rd4sPfyumV6oNDT-oCHLEwNt39VUdf13talkrErAYEOFGcVDlhJIap6ubtM77N6K-PzP80S19PKsFXMnazBbui15DdOU5-5xrxQZcE3UiDjpLzrW1q5UbEvb9r0o~VoXW-KpDAWpPgQbVU8gij1633jmWMzoTZA-pGoPLMC5wOOl8HI~8Q__"
 						alt="Picture of a woman"
-						className="mr-16 -right-36 md:right-32 object-cover absolute w-full h-[20rem] md:w-[38rem] md:h-[31rem] mt-4 md:mt-0"
+						className="pr-0 -right-0 md:right-32 overflow-hidden object-cover absolute w-[90%] h-[20rem] md:w-[38rem] md:h-[31rem] mt-4 md:mt-0"
 					/>
 				</div>
 			</div>
