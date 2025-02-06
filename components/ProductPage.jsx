@@ -145,7 +145,7 @@ const ProductPage = ({ productData, storeData }) => {
 				isCartOpen={isCartOpen}
 				setIsCartOpen={setIsCartOpen}
 			/>
-			<div onClick={() => router.push(`/${storeData?.storeLink}`)} className="pt-20 px-4 flex items-center gap-3 cursor-pointer w-full max-w-4xl mx-auto">
+			<div onClick={() => router.push(`/store/${storeData?.storeLink}`)} className="pt-20 px-4 flex items-center gap-3 cursor-pointer w-full max-w-4xl mx-auto">
 				<FaChevronLeft />
 				<h1 className="text-lg font-bold capitalize">
 					Back to Store

@@ -187,7 +187,7 @@ const StorePage = ({ storeData, storeProductsData }) => {
 							className="rounded-xl p-0 cursor-pointer border hover:shadow-md transition-shadow duration-200 relative"
 							onClick={() =>
 								router.push(
-									`/${storeData?.storeLink}/product/${product?._id}`,
+									`/store/${storeData?.storeLink}/product/${product?._id}`,
 								)
 							}
 						>
