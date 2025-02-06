@@ -7,7 +7,7 @@ const StoreFooter = () => {
 		<footer className="bg-white border-t mt-8">
 			<div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 flex md:flex-row flex-col-reverse gap-3 justify-between items-center">
 				<p className="text-gray-600 text-sm">
-					&copy; {new Date().getFullYear()} Tradeet. All
+					&copy; {new Date().getFullYear()} Tradeet Vendhub Limited. All
 					rights reserved.
 				</p>
 				<Link href="/signup">
