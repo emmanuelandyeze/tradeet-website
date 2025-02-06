@@ -8,7 +8,6 @@ import {
 	useSearchParams,
 } from 'next/navigation';
 import axiosClient from '@/utils/axios';
-import Modal from 'react-modal';
 import toast from 'react-hot-toast';
 import axios from 'axios';
 import { getStoreData } from '@/app/lib/api';
