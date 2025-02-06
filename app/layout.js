@@ -52,14 +52,36 @@ const lora = Lora({
 	weight: ['400', '500', '600', '700'],
 });
 
+
 export const metadata = {
-	title:
-		'Tradeet Business – Manage Inventory, Finances & Marketing',
+	title: {
+		template: '%s | Tradeet',
+		default:
+			'Tradeet Business – Manage Inventory, Finances & Marketing',
+	},
 	description:
 		'Tradeet is an all-in-one business management app for freelancers and small business owners. Track inventory, automate invoicing, build your online presence, and market your brand with ease.',
+	canonical: 'https://www.tradeet.ng',
 	keywords:
 		'business management app, inventory tracking for small businesses, best finance tools for freelancers, marketing automation for e-commerce, all-in-one business solution, online store builder, invoice and expense tracking app, small business growth tools, WhatsApp marketing software',
 	author: 'Tradeet Business',
+	openGraph: {
+		title:
+			'Tradeet Business – Manage Inventory, Finances & Marketing',
+		description:
+			'Tradeet is an all-in-one business management app for freelancers and small business owners. Track inventory, automate invoicing, build your online presence, and market your brand with ease.',
+		image: 'https://www.tradeet.ng/images/logo.png',
+		url: 'https://www.tradeet.ng',
+		type: 'website',
+	},
+	twitter: {
+		card: 'summary_large_image',
+		title:
+			'Tradeet Business – Manage Inventory, Finances & Marketing',
+		description:
+			'Tradeet is an all-in-one business management app for freelancers and small business owners. Track inventory, automate invoicing, build your online presence, and market your brand with ease.',
+		image: 'https://www.tradeet.ng/images/logo.png',
+	},
 };
 
 export default function RootLayout({ children }) {
@@ -78,9 +100,7 @@ export default function RootLayout({ children }) {
 			<body
 				className={` ${openSans.className} antialiased`}
 			>
-				<Navbar />
 				{children}
-				<Footer />
 			</body>
 		</html>
 	);
