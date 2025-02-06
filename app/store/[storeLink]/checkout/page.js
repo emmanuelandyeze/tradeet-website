@@ -362,7 +362,7 @@ const CheckoutPage = () => {
 				localStorage.removeItem('cart');
 				// console.log(response.data.orderId);
 				router.push(
-					`/${storeLink}/pay?orderId=${response.data.order._id}`,
+					`/store/${storeLink}/pay?orderId=${response.data.order._id}`,
 				);
 				setLoading(false);
 			} else {

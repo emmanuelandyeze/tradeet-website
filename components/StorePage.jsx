@@ -10,13 +10,16 @@ import { FaBagShopping } from 'react-icons/fa6';
 import Modal from '@/components/Modal';
 import toast from 'react-hot-toast';
 import StoreFooter from '@/components/StoreFooter';
+import axios from 'axios';
 
 const StorePage = ({ storeData, storeProductsData }) => {
 	const { productsData } = storeProductsData;
 	const [error, setError] = useState(null);
 	const [filteredProducts, setFilteredProducts] =
-		useState(productsData);
+		useState([]);
 	const [categories, setCategories] = useState([]);
+	 const [selectedCategory, setSelectedCategory] =
+			useState('All');
 	const [selectedProduct, setSelectedProduct] =
 		useState(null);
 	const [selectedVariants, setSelectedVariants] = useState(
@@ -26,10 +29,8 @@ const StorePage = ({ storeData, storeProductsData }) => {
 	const [modalVisible, setModalVisible] = useState(false);
 	const router = useRouter();
 	const [cart, setCart] = useState([]);
-	const [selectedCategory, setSelectedCategory] =
-		useState('all');
 	const [totalPrice, setTotalPrice] = useState(0);
-		const [isCartOpen, setIsCartOpen] = useState(false);
+	const [isCartOpen, setIsCartOpen] = useState(false);
 
 	const handleSearch = useCallback((results) => {
 		setFilteredProducts(results);
@@ -48,7 +49,7 @@ const StorePage = ({ storeData, storeProductsData }) => {
 					newCart[existingItemIndex].quantity +=
 						variant.quantity;
 					setCart(newCart);
-					setIsCartOpen(true)
+					setIsCartOpen(true);
 				} else {
 					setCart([
 						...cart,
@@ -119,6 +120,41 @@ const StorePage = ({ storeData, storeProductsData }) => {
 		]);
 	};
 
+	useEffect(() => {
+		async function fetchCategory() {
+			// Fetch categories from the backend
+			const response = await axios.get(
+				`https://tradeet-api.onrender.com/category/${storeData?._id}`,
+			);
+			setCategories(response.data);
+		}
+		fetchCategory();
+	}, []);
+
+	// Filter products based on selected category
+	useEffect(() => {
+		if (selectedCategory === 'All') {
+			setFilteredProducts(productsData); // No filter applied
+		} else {
+			setFilteredProducts(
+				productsData.filter(
+					(product) =>
+						product.category &&
+						product.category.name === selectedCategory,
+				),
+			);
+		}
+	}, [selectedCategory, productsData]);
+
+	// Handle card selection for filtering
+	const handleCategorySelect = (categoryName) => {
+		if (selectedCategory === categoryName) {
+			setSelectedCategory(null); // Deselect category
+		} else {
+			setSelectedCategory(categoryName); // Select category
+		}
+	};
+
 	if (error) {
 		return (
 			<div className="min-h-screen max-w-3xl mx-auto flex justify-center items-center">
@@ -131,6 +167,7 @@ const StorePage = ({ storeData, storeProductsData }) => {
 		return <p>Loading...</p>; // Prevents hydration issues
 	}
 
+	console.log(filteredProducts);
 
 	return (
 		<div>
@@ -143,7 +180,7 @@ const StorePage = ({ storeData, storeProductsData }) => {
 			/>
 			<div className="container max-w-6xl pb-20 mx-auto pt-20 px-4">
 				{storeData?.storeBanner ? (
-					<div className='mb-5'>
+					<div className="mb-5">
 						<img
 							src={storeData?.storeBanner}
 							alt={storeData?.name}
@@ -174,11 +211,46 @@ const StorePage = ({ storeData, storeProductsData }) => {
 					onSearch={handleSearch}
 					storeData={storeData}
 				/>
-				<div className="flex justify-between items-center mb-4">
+				{/* <div className="flex justify-between items-center mb-4">
 					<h1 className="text-xl mr-5 font-semibold text-center">
 						Our Catalogue
 					</h1>
-					
+				</div> */}
+				{/* Categories as clickable cards */}
+				<div className="flex overflow-x-auto space-x-4 py-4 mb-6">
+					{/* "All" category */}
+					<div
+						className={`px-6 py-2 bg-gray-200 rounded-lg cursor-pointer min-w-max ${
+							selectedCategory === 'All'
+								? 'bg-green-600 text-white'
+								: 'hover:bg-gray-300'
+						}`}
+						onClick={() => handleCategorySelect('All')}
+					>
+						<h3 className="text-lg font-semibold">All</h3>
+					</div>
+
+					{/* Other categories */}
+					{categories?.map((category) => (
+						<div
+							key={category._id}
+							className={`px-6 py-2 bg-gray-200 rounded-lg cursor-pointer min-w-max ${
+								selectedCategory === category.name
+									? 'bg-green-600 text-white'
+									: 'hover:bg-gray-300'
+							}`}
+							onClick={() =>
+								handleCategorySelect(category.name)
+							}
+						>
+							<h3 className="text-lg font-semibold">
+								{category.name}
+							</h3>
+							<p className="text-sm">
+								{category.description}
+							</p>
+						</div>
+					))}
 				</div>
 				<div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 md:gap-6">
 					{filteredProducts?.map((product) => (
@@ -191,10 +263,9 @@ const StorePage = ({ storeData, storeProductsData }) => {
 								)
 							}
 						>
-							
-							<div className="absolute top-2 right-2 bg-red-600 text-white text-xs font-bold px-2 py-1 rounded-md shadow-sm">
+							{/* <div className="absolute top-2 right-2 bg-red-600 text-white text-xs font-bold px-2 py-1 rounded-md shadow-sm">
 								-10%
-							</div>
+							</div> */}
 
 							<img
 								src={product.image}
@@ -205,7 +276,10 @@ const StorePage = ({ storeData, storeProductsData }) => {
 								<h2 className="text-md capitalize md:text-lg pt-3 font-medium truncate">
 									{product.name}
 								</h2>
-								
+								<p className="text-gray-500">
+									{product?.category?.name}
+								</p>
+
 								<p className="text-gray-700 flex flex-row items-start gap-1 mt-2 pb-2 text-lg font-normal md:text-md">
 									<span className="text-slate-900 font-semibold">
 										₦{' '}
@@ -213,12 +287,6 @@ const StorePage = ({ storeData, storeProductsData }) => {
 											product.price,
 										)}
 									</span>
-									<span className="line-through text-sm text-gray-500">
-										₦{' '}
-										{new Intl.NumberFormat('en-US').format(
-											product.price + product.price * 0.1,
-										)}
-									</span>{' '}
 								</p>
 							</div>
 						</div>

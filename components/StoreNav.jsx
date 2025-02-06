@@ -303,8 +303,8 @@ const StoreNavbar = ({
 										JSON.stringify(cart),
 									);
 									const url = advId
-										? `/${storeData?.storeLink}/checkout?ad=${advId}`
-										: `/${storeData?.storeLink}/checkout`;
+										? `/store/${storeData?.storeLink}/checkout?ad=${advId}`
+										: `/store/${storeData?.storeLink}/checkout`;
 									router.push(url);
 								}}
 								className="w-full bg-black text-white py-2 rounded-md hover:bg-gray-900"
