@@ -95,14 +95,14 @@ const Page = () => {
 
 	const amount = order?.totalAmount;
 
-	console.log(order);
-
-	const formattedProducts = order?.cart?.map((product) => ({
-		name: product.name,
-		quantity: product.quantity,
-		price: product.price,
-		image: product.images[0],
-	}));
+	const formattedProducts = order?.items?.map(
+		(product) => ({
+			name: product.name,
+			quantity: product.quantity,
+			price: product.price,
+			image: product.images[0],
+		}),
+	);
 
 	const config = {
 		reference: new Date().getTime().toString(),
