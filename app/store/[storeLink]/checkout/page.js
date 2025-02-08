@@ -349,7 +349,8 @@ const CheckoutPage = () => {
 			};
 
 			const response = await axios.post(
-				`https://tradeet-api.onrender.com/orders`,
+				// `https://tradeet-api.onrender.com/orders`,
+				'http://192.168.241.140:5000/orders',
 				orderData,
 			);
 

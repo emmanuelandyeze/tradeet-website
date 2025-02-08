@@ -156,8 +156,8 @@ const Page = () => {
 					serviceType.charAt(0).toUpperCase() +
 					serviceType.slice(1)
 				}*\n\n` +
-				`See invoice https://tradeet.ng/${storeData?.storeLink}/orders/${_id}\n\n` +
-				`Sent from Tradeet https://tradeet.ng/${storeData?.storeLink}`,
+				`See invoice https://tradeet.ng/store/${storeData?.storeLink}/orders/${_id}\n\n` +
+				`Sent from Tradeet https://tradeet.ng/store/${storeData?.storeLink}`,
 		);
 
 		const whatsappUrl = `https://wa.me/${storeData?.whatsapp?.replace(
@@ -230,7 +230,7 @@ const Page = () => {
 				<div className="flex flex-row justify-between items-center mb-4">
 					<div
 						onClick={() =>
-							router.push(`/${storeData?.storeLink}`)
+							router.push(`/store/${storeData?.storeLink}`)
 						}
 						className="flex cursor-pointer flex-row gap-1 items-center"
 					>
