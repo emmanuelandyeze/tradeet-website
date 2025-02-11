@@ -11,6 +11,8 @@ import axiosClient from '@/utils/axios';
 import toast from 'react-hot-toast';
 import axios from 'axios';
 import { getStoreData } from '@/app/lib/api';
+import StoreLocationPicker from '@/components/StoreLocationPicker';
+import NormalStoreNavbar from '@/components/NormalStoreNav';
 
 const countryCodes = [{ code: '+234', country: 'Nigeria' }];
 
@@ -41,6 +43,7 @@ const CheckoutPage = () => {
 		useState([]);
 	const [selectedLocation, setSelectedLocation] =
 		useState('');
+	const [landmark, setLandmark] = useState('');
 	const [availableLocations, setAvailableLocations] =
 		useState([]);
 	const [loading, setLoading] = useState(false);
@@ -123,7 +126,7 @@ const CheckoutPage = () => {
 		setCart(savedCart);
 	}, []);
 
-	console.log(cart);
+	// console.log(cart);
 
 	// Handle Input Changes
 	const handleInputChange = (e) => {
@@ -144,52 +147,6 @@ const CheckoutPage = () => {
 		setAddress(e.target.value);
 	};
 
-	// Handle state selection change
-	const handleStateChange = (event) => {
-		const state = event.target.value;
-		setSelectedState(state);
-
-		// Filter delivery services that match the selected state
-		const servicesForState = deliveryServices
-			.map((service) => {
-				const matchingDetail = service.deliveryDetails.find(
-					(detail) => detail.state === state,
-				);
-				return matchingDetail
-					? {
-							serviceName: service.serviceName,
-							locations: matchingDetail.locations,
-					  }
-					: null;
-			})
-			.filter((service) => service !== null);
-
-		console.log(servicesForState);
-		if (servicesForState.length > 0) {
-			// Populate available locations for the selected state
-			setAvailableLocations(servicesForState[0].locations);
-			setServiceName(servicesForState[0].serviceName);
-		} else {
-			setAvailableLocations([]);
-		}
-	};
-
-	console.log(availableLocations);
-
-	// Handle location selection change
-	const handleLocationChange = (event) => {
-		const location = event.target.value;
-		setSelectedLocation(location);
-
-		// Find the delivery fee for the selected location
-		const selectedService = availableLocations.find(
-			(loc) => loc.location === location,
-		);
-		if (selectedService) {
-			setDeliveryFee(selectedService.fee);
-		}
-	};
-
 	const validateFields = () => {
 		if (!userDetails.name || !userDetails.whatsapp) {
 			toast.error('Please fill in all customer details.');
@@ -198,10 +155,10 @@ const CheckoutPage = () => {
 
 		if (
 			serviceType === 'delivery' &&
-			(!address || !selectedState)
+			(!address || !landmark)
 		) {
 			toast.error(
-				'Please fill in the delivery address and select a state.',
+				'Please fill in the delivery address and select a nearest landmark.',
 			);
 			return false;
 		}
@@ -217,24 +174,24 @@ const CheckoutPage = () => {
 	// Calculate Total Amount
 	const getTotalAmount = () => {
 		return cart.reduce((total, item) => {
-			// Get the base price from the variant or the product itself
-			const basePrice = item?.variant
-				? item?.variant?.price
-				: item?.price;
-
-			// Calculate the total price of all additions
-			const additionsPrice =
-				item?.additions?.reduce(
-					(sum, add) => sum + (add?.price || 0),
+			const addOnsTotal =
+				item.addOns?.reduce(
+					(sum, addOn) =>
+						sum + addOn.price * addOn.quantity,
 					0,
 				) || 0;
-
-			// Calculate total for this item
-			const itemTotal =
-				(basePrice + additionsPrice) * item.quantity;
-
-			// Add to the running total
-			return total + itemTotal;
+			const variantsTotal =
+				item.variants?.reduce(
+					(sum, variant) =>
+						sum + variant.price * variant.quantity,
+					0,
+				) || 0;
+			return (
+				total +
+				item.basePrice * item.quantity +
+				addOnsTotal +
+				variantsTotal
+			);
 		}, 0);
 	};
 
@@ -247,28 +204,23 @@ const CheckoutPage = () => {
 	};
 
 	// Cart Management
-	const increaseQuantity = (index) => {
-		const newCart = [...cart];
-		newCart[index].quantity += 1;
-		setCart(newCart);
-	};
-
-	const decreaseQuantity = (index) => {
-		const newCart = [...cart];
-		if (newCart[index].quantity > 1) {
-			newCart[index].quantity -= 1;
-		} else {
-			newCart.splice(index, 1);
+	const removeCartItem = (productId) => {
+		const confirmClear = window.confirm(
+			'Are you sure you want to remove this item from your cart?',
+		);
+		if (confirmClear) {
+			setCart((prevCart) => {
+				const updatedCart = prevCart.filter(
+					(item) => item.productId !== productId,
+				);
+				localStorage.setItem(
+					'cart',
+					JSON.stringify(updatedCart),
+				); // Update localStorage
+				return updatedCart;
+			});
 		}
-		setCart(newCart);
 	};
-
-	const removeItemFromCart = (index) => {
-		const newCart = [...cart];
-		newCart.splice(index, 1);
-		setCart(newCart);
-	};
-	console.log(selectedLocation);
 
 	const totalAmount =
 		getSubtotal() +
@@ -276,11 +228,11 @@ const CheckoutPage = () => {
 		discountAmount;
 
 	const serviceFee =
-		totalAmount < 1000
+		totalAmount < 500
 			? 0
-			: Math.min(totalAmount * 0.05, 2000);
+			: Math.min(totalAmount * 0.1, 2000);
 
-	const finalTotal = totalAmount;
+	const finalTotal = totalAmount + serviceFee;
 
 	// Function to apply the discount percentage to the order
 	const onApplyDiscount = (percentage) => {
@@ -324,12 +276,7 @@ const CheckoutPage = () => {
 					name: userDetails.name,
 					contact:
 						selectedCountryCode + userDetails.whatsapp,
-					address:
-						address +
-						', ' +
-						selectedLocation +
-						', ' +
-						selectedState,
+					address: address && address + ', ' + landmark,
 					expoPushToken: userDetails?.expoPushToken,
 					pickUp: address ? false : true,
 				},
@@ -341,16 +288,20 @@ const CheckoutPage = () => {
 				},
 				userId: userDetails?._id,
 				totalAmount: finalTotal,
-				itemsAmount: totalAmount,
+				itemsAmount: getSubtotal(),
 				discountCode: discountInfo
 					? discountInfo.code
 					: null,
 				status: 'pending',
+				deliveryFee:
+					serviceType === 'delivery' ? deliveryFee : 0,
+				serviceFee: serviceFee,
+				discountAmount: discountAmount,
 			};
 
 			const response = await axios.post(
 				`https://tradeet-api.onrender.com/orders`,
-				// 'http://192.168.241.140:5000/orders',
+				// 'http://192.168.1.159:5000/orders',
 				orderData,
 			);
 
@@ -379,307 +330,276 @@ const CheckoutPage = () => {
 	};
 
 	return (
-		<div className="container max-w-lg mx-auto p-4">
-			<h1 className="text-2xl font-bold mb-4">
-				{store?.name} Checkout
-			</h1>
-			<form className="mb-4">
-				{/* Customer Details Section */}
-				<div className="border-[1px] border-gray-200 p-4 mb-4 rounded-xl">
-					<h2 className="text-lg font-bold mb-4">
-						Customer Details
-					</h2>
-					<div className="mb-4">
-						<label className="block mb-1 text-sm">
-							Name
-						</label>
-						<input
-							type="text"
-							name="name"
-							value={userDetails.name}
-							onChange={handleInputChange}
-							className="w-full p-2 text-sm border rounded-lg"
-							required
-						/>
-					</div>
-					<div className="mb-4">
-						<label className="block mb-1 text-sm">
-							WhatsApp Number
-						</label>
-						<div className="flex items-center w-full border border-gray-200 rounded-lg shadow-none">
-							<select
-								value={selectedCountryCode}
-								onChange={(e) =>
-									setSelectedCountryCode(e.target.value)
-								}
-								className="block w-[25%] px-2 py-3 border-r border-gray-200 rounded-l-lg focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-							>
-								{countryCodes.map((code) => (
-									<option key={code.code} value={code.code}>
-										{`${code.code}`}
-									</option>
-								))}
-							</select>
-							<input
-								type="text"
-								name="whatsapp"
-								value={userDetails.whatsapp}
-								onChange={handleInputChange}
-								placeholder="123 4567 890"
-								className="block w-[75%] px-4 py-3 border-0 rounded-r-lg focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-								required
-							/>
-						</div>
-					</div>
-				</div>
-
-				{/* Delivery / Pickup Section */}
-				<div className="border-[1px] border-gray-200 p-4 mb-4 rounded-xl">
-					<h2 className="text-lg font-bold mb-4">
-						Delivery / Pickup
-					</h2>
-					<div className="mb-4">
-						<select
-							value={serviceType}
-							onChange={handleServiceChange}
-							className="w-full p-2 text-sm border rounded-lg"
-						>
-							<option
-								value={'self-pickup | ' + store?.address}
-							>
-								Self Pickup - {store?.address}
-							</option>
-							{/* <option value="delivery">Delivery</option> */}
-						</select>
-					</div>
-
-					{serviceType === 'delivery' && (
-						<>
-							{/* Select State */}
+		<div>
+			<NormalStoreNavbar storeData={store} />
+			<div className="flex max-w-5xl mx-auto flex-col justify-center px-4 pt-20 gap-3 max-auto">
+				<h1 className="text-2xl text-center font-bold mb-4">
+					{store?.name} Checkout
+				</h1>
+				<form className="mb-4 flex flex-col w-full mx-auto justify-center gap-2 md:gap-5 md:flex-row">
+					<div className="md:w-[50%]">
+						{/* Customer Details Section */}
+						<div className="border-[1px] border-gray-200 p-4 mb-4 rounded-xl">
+							<h2 className="text-lg font-bold mb-4">
+								Customer Details
+							</h2>
 							<div className="mb-4">
 								<label className="block mb-1 text-sm">
-									State
+									Name
 								</label>
-								<select
-									value={selectedState}
-									onChange={handleStateChange}
-									className="w-full p-2 text-sm border rounded-lg"
-								>
-									<option value="">Select State</option>
-									{deliveryServices?.map((service) =>
-										service?.deliveryDetails?.map(
-											(detail) => (
-												<option
-													key={detail.state}
-													value={detail.state}
-												>
-													{detail.state}
-												</option>
-											),
-										),
-									)}
-								</select>
-							</div>
-
-							{/* Select Location */}
-							{availableLocations?.length > 0 && (
-								<div className="mb-4">
-									<label className="block mb-1 text-sm">
-										Location
-									</label>
-									<select
-										value={selectedLocation}
-										onChange={handleLocationChange}
-										className="w-full p-2 text-sm border rounded-lg"
-									>
-										<option value="">
-											Select Location
-										</option>
-										{availableLocations?.map((location) => (
-											<option
-												key={location.location}
-												value={location.location}
-											>
-												{location.location} - ₦
-												{location.fee}
-											</option>
-										))}
-									</select>
-								</div>
-							)}
-
-							{/* Address Input */}
-							<div className="mb-4">
-								<label className="block mb-1 text-sm">
-									Address
-								</label>
-								<textarea
-									value={address}
-									onChange={handleAddressChange}
+								<input
+									type="text"
+									name="name"
+									value={userDetails.name}
+									onChange={handleInputChange}
 									className="w-full p-2 text-sm border rounded-lg"
 									required
 								/>
 							</div>
-						</>
-					)}
-				</div>
-
-				{/* Discount Code Section */}
-				<div className="border-[1px] border-gray-200 p-4 mb-4 rounded-xl">
-					<div>
-						<h2 className="text-lg font-bold mb-4">
-							Discount Code
-						</h2>
-						<div className="flex space-x-4">
-							<input
-								type="text"
-								value={code}
-								onChange={(e) => setCode(e.target.value)}
-								placeholder="Enter discount code"
-								className="flex-grow p-2 text-sm border rounded-lg"
-							/>
-							<button
-								type="button"
-								onClick={() => handleValidateDiscount()}
-								className="p-2 text-sm font-semibold text-white bg-indigo-500 rounded-lg"
-							>
-								Apply
-							</button>
-						</div>
-						{error && (
-							<p className="text-red-500 text-sm">
-								{error}
-							</p>
-						)}
-						{discountInfo && (
-							<p className="px-2 py-2 mt-2 text-sm bg-slate-100 rounded-lg">
-								🎁 Discount Applied -{' '}
-								{discountInfo?.percentage}% off!
-							</p>
-						)}
-					</div>
-				</div>
-
-				{/* Order Summary Section */}
-				<div className="border-[1px] border-gray-200 p-4 mb-4 rounded-xl">
-					<h2 className="text-lg font-bold mb-4">
-						Order Summary
-					</h2>
-					<div className="space-y-2">
-						{cart.map((item, index) => (
-							<>
-								<div
-									key={index}
-									className="flex items-start justify-between"
-								>
-									<div>
-										<h3 className="text-md font-semibold">
-											{item.name}
-										</h3>
-										{item?.variant ? (
-											<p className="text-gray-600 text-sm">
-												{item?.variant?.name} - ₦
-												{new Intl.NumberFormat(
-													'en-US',
-												).format(item?.variant?.price)}
-											</p>
-										) : (
-											<p className="text-gray-600 text-sm">
-												₦
-												{new Intl.NumberFormat(
-													'en-US',
-												).format(item?.price)}
-											</p>
-										)}
-										{item?.additions?.length > 0 && (
-											<div className="mt-2">
-												<p className="font-medium">
-													Additions:
-												</p>
-												<ul>
-													{item?.additions.map((add) => (
-														<li
-															key={add._id}
-															className="text-gray-600"
-														>
-															{add.name} - ₦
-															{new Intl.NumberFormat(
-																'en-US',
-															).format(add.price)}
-														</li>
-													))}
-												</ul>
-											</div>
-										)}
-									</div>
-									<div className="flex items-center space-x-2">
-										<button
-											type="button"
-											onClick={() =>
-												decreaseQuantity(index)
-											}
-											className="px-2 py-1 text-sm font-semibold text-white bg-red-500 rounded-lg"
-										>
-											-
-										</button>
-										<p className="text-xs text-gray-500">
-											{item.quantity}
-										</p>
-										<button
-											type="button"
-											onClick={() =>
-												increaseQuantity(index)
-											}
-											className="px-2 py-1 text-sm font-semibold text-white bg-green-500 rounded-lg"
-										>
-											+
-										</button>
-										<button
-											type="button"
-											onClick={() =>
-												removeItemFromCart(index)
-											}
-											className="text-red-500"
-										>
-											<IoMdTrash size={20} />
-										</button>
-									</div>
+							<div className="mb-4">
+								<label className="block mb-1 text-sm">
+									WhatsApp Number
+								</label>
+								<div className="flex items-center w-full border border-gray-200 rounded-lg shadow-none">
+									<select
+										value={selectedCountryCode}
+										onChange={(e) =>
+											setSelectedCountryCode(e.target.value)
+										}
+										className="block w-[25%] px-2 py-3 border-r border-gray-200 rounded-l-lg focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+									>
+										{countryCodes.map((code) => (
+											<option
+												key={code.code}
+												value={code.code}
+											>
+												{`${code.code}`}
+											</option>
+										))}
+									</select>
+									<input
+										type="text"
+										name="whatsapp"
+										value={userDetails.whatsapp}
+										onChange={handleInputChange}
+										placeholder="123 4567 890"
+										className="block w-[75%] px-4 py-3 border-0 rounded-r-lg focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+										required
+									/>
 								</div>
-								<hr />
-							</>
-						))}
+							</div>
+						</div>
+
+						{/* Delivery / Pickup Section */}
+						<div className="border-[1px] border-gray-200 p-4 mb-4 rounded-xl">
+							<h2 className="text-lg font-bold mb-4">
+								Delivery / Pickup
+							</h2>
+							<div className="mb-4">
+								<select
+									value={serviceType}
+									onChange={handleServiceChange}
+									className="w-full p-2 text-sm border rounded-lg"
+								>
+									<option
+										value={
+											'self-pickup | ' + store?.address
+										}
+									>
+										Self Pickup - {store?.address}
+									</option>
+									<option value="delivery">Delivery</option>
+								</select>
+							</div>
+
+							{serviceType === 'delivery' && (
+								<>
+									{/* Address Input */}
+									<div className="mb-4">
+										<label className="block mb-1 text-sm">
+											Address*
+										</label>
+										<textarea
+											value={address}
+											onChange={handleAddressChange}
+											className="w-full p-2 text-sm border rounded-lg"
+											required
+										/>
+									</div>
+									<StoreLocationPicker
+										store={store}
+										setDeliveryFee={setDeliveryFee}
+										setLandmark={setLandmark}
+									/>
+								</>
+							)}
+						</div>
 					</div>
 
-					<div className="mt-4 text-right">
-						<p className="text-sm">
-							Subtotal: ₦{getSubtotal()}
-						</p>
-						{serviceType === 'delivery' && (
-							<p className="text-sm">
-								Delivery Fee: ₦{deliveryFee}
-							</p>
-						)}
-						{discountInfo && (
-							<p className="text-sm text-red-500">
-								Discount: ₦{discountAmount}
-							</p>
-						)}
-						<p className="text-lg font-bold">
-							Total: ₦{finalTotal}
-						</p>
-					</div>
-				</div>
+					<div className="md:w-[50%]">
+						{/* Discount Code Section */}
+						<div className="border-[1px] border-gray-200 p-4 mb-4 rounded-xl">
+							<div>
+								<h2 className="text-lg font-bold mb-4">
+									Discount Code
+								</h2>
+								<div className="flex space-x-4">
+									<input
+										type="text"
+										value={code}
+										onChange={(e) =>
+											setCode(e.target.value)
+										}
+										placeholder="Enter discount code"
+										className="flex-grow p-2 text-sm border rounded-lg"
+									/>
+									<button
+										type="button"
+										onClick={() => handleValidateDiscount()}
+										className="p-2 text-sm font-semibold text-white bg-indigo-500 rounded-lg"
+									>
+										Apply
+									</button>
+								</div>
+								{error && (
+									<p className="text-red-500 text-sm">
+										{error}
+									</p>
+								)}
+								{discountInfo && (
+									<p className="px-2 py-2 mt-2 text-sm bg-slate-100 rounded-lg">
+										🎁 Discount Applied -{' '}
+										{discountInfo?.percentage}% off!
+									</p>
+								)}
+							</div>
+						</div>
+						{/* Order Summary Section */}
+						<div className="border-[1px] border-gray-200 p-4 mb-4 rounded-xl">
+							<h2 className="text-lg font-bold mb-4">
+								Order Summary
+							</h2>
+							<div className="space-y-2">
+								{cart.length > 0 ? (
+									<ul>
+										{cart.map((item, index) => (
+											<li
+												key={index}
+												className="flex flex-col mb-4"
+											>
+												<div className="flex items-start">
+													<img
+														src={item.image}
+														alt={item.name}
+														className="w-12 h-12 object-cover rounded"
+													/>
+													<div className="ml-4">
+														<p className="font-medium">
+															{item.name} - x{item.quantity}
+														</p>
+														<p className="text-gray-600">
+															₦
+															{item.basePrice *
+																item.quantity}
+														</p>
+														{item.variants?.map(
+															(variant, idx) => (
+																<p
+																	key={idx}
+																	className="text-sm text-gray-500"
+																>
+																	{variant.name} - ₦
+																	{variant.price} x{' '}
+																	{variant.quantity}
+																</p>
+															),
+														)}
+														{item.addOns?.map(
+															(addOn, idx) => (
+																<p
+																	key={idx}
+																	className="text-sm text-gray-500"
+																>
+																	{addOn.name} - ₦
+																	{addOn.price} x{' '}
+																	{addOn.quantity}
+																</p>
+															),
+														)}
+													</div>
+													<button
+														className="mt-1 ml-5"
+														onClick={() =>
+															removeCartItem(item.productId)
+														}
+													>
+														<IoMdTrash color="red" />
+													</button>
+												</div>
+											</li>
+										))}
+									</ul>
+								) : (
+									<div className="flex justify-center items-center">
+										<p className="text-center text-2xl text-gray-600">
+											Your cart is empty
+										</p>
+									</div>
+								)}
+							</div>
 
-				{/* Place Order Button */}
-				<button
-					type="button"
-					onClick={handlePlaceOrder}
-					disabled={loading}
-					className="w-full p-4 text-sm font-semibold text-white bg-green-500 rounded-lg"
-				>
-					{loading ? 'Placing Order...' : 'Place Order'}
-				</button>
-			</form>
+							<div className="mt-4 flex pt-5 border-t-[1px] border-slate-300 items-end gap-1 justify-end flex-col">
+								<div className="flex flex-row gap-14 items-center">
+									<p className="text-sm">Subtotal</p>
+									<p className="text-sm">
+										₦{getSubtotal()?.toLocaleString()}
+									</p>
+								</div>
+								{serviceType === 'delivery' && (
+									<div className="flex flex-row gap-14 items-center">
+										<p className="text-sm">Delivery Fee</p>
+										<p className="text-sm">
+											₦{deliveryFee?.toLocaleString()}
+										</p>
+									</div>
+								)}
+								{discountInfo && (
+									<div className="flex flex-row gap-14 items-center">
+										<p className="text-sm text-red-500">
+											Discount
+										</p>
+										<p className="text-sm text-red-500">
+											₦{discountAmount?.toLocaleString()}
+										</p>
+									</div>
+								)}
+								<div className="flex flex-row gap-14 items-center">
+									<p className="text-sm">Service fee</p>
+									<p className="text-sm">
+										₦{serviceFee?.toLocaleString()}
+									</p>
+								</div>
+								<div className="flex flex-row gap-14 items-center">
+									<p className="text-lg font-bold">Total</p>
+									<p className="text-lg font-bold">
+										₦{finalTotal?.toLocaleString()}
+									</p>
+								</div>
+							</div>
+						</div>
+
+						{/* Place Order Button */}
+						<button
+							type="button"
+							onClick={() => handlePlaceOrder()}
+							disabled={loading}
+							className="w-full p-4 text-md font-semibold text-white bg-green-500 rounded-lg"
+						>
+							{loading ? 'Placing Order...' : 'Place Order'}
+						</button>
+					</div>
+				</form>
+			</div>
 		</div>
 	);
 };

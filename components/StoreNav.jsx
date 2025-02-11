@@ -25,18 +25,14 @@ const StoreNavbar = ({
 	useEffect(() => {
 		const storedCart = localStorage.getItem('cart');
 		if (storedCart) {
-			const parsedCart = storedCart
-				? JSON.parse(storedCart)
-				: [];
-
-			// Filter cart items based on storeId
-			const filteredCart = parsedCart.filter(
-				(item) => item.store === storeData?._id,
+			const parsedCart = JSON.parse(storedCart) || [];
+			const storeSpecificCart = parsedCart.filter(
+				(item) => item.storeId === storeData._id,
 			);
-
-			setCart(filteredCart);
+			setCart(storeSpecificCart);
 		}
-	}, [setCart]);
+	}, [setCart, storeData]);
+
 
 	// Save the cart to localStorage whenever it changes
 	useEffect(() => {
@@ -47,93 +43,56 @@ const StoreNavbar = ({
 		}
 	}, [cart]);
 
-	const toggleSidebar = () => {
-		setIsOpen(!isOpen);
-	};
-
 	const toggleCartSidebar = () => {
 		setIsCartOpen(!isCartOpen);
 	};
 
-	const createVariantKey = (item) => {
-		return `${item._id}-${
-			item.variant?._id
-		}-${item.additions?.map((add) => add._id).join('-')}`;
-	};
-
-	const addItemToCart = (item) => {
-		const variantKey = createVariantKey(item);
-		const existingItemIndex = cart.findIndex(
-			(cartItem) =>
-				createVariantKey(cartItem) === variantKey,
-		);
-
-		if (existingItemIndex !== -1) {
-			const newCart = [...cart];
-			newCart[existingItemIndex].quantity += item.quantity;
-			setCart(newCart);
-		} else {
-			setCart([
-				...cart,
-				{ ...item, quantity: item.quantity },
-			]);
-		}
-	};
-
-	const removeItemFromCart = (index) => {
-		const newCart = [...cart];
-		newCart.splice(index, 1);
-		setCart(newCart);
-	};
-
 	const clearCart = () => {
-		setCart([]);
-		localStorage.removeItem('cart');
-	};
-
-	const increaseQuantity = (index) => {
-		const newCart = [...cart];
-		newCart[index].quantity += 1;
-		setCart(newCart);
-	};
-
-	const decreaseQuantity = (index) => {
-		const newCart = [...cart];
-		if (newCart[index].quantity > 1) {
-			newCart[index].quantity -= 1;
-		} else {
-			newCart.splice(index, 1);
+		const confirmClear = window.confirm(
+			'Are you sure you want to clear your cart?',
+		);
+		if (confirmClear) {
+			setCart([]);
+			localStorage.removeItem('cart'); // Clear cart from localStorage
 		}
-		setCart(newCart);
+	};
+
+	const removeCartItem = (productId) => {
+		console.log(productId)
+		setCart((prevCart) => {
+			const updatedCart = prevCart.filter(
+				(item) => item.productId !== productId,
+			);
+			localStorage.setItem(
+				'cart',
+				JSON.stringify(updatedCart),
+			); // Update localStorage
+			return updatedCart;
+		});
 	};
 
 	const getTotalAmount = () => {
 		return cart.reduce((total, item) => {
-			// Get the base price from the variant or the product itself
-			const basePrice = item?.variant
-				? item?.variant?.price
-				: item?.price;
-
-			// Calculate the total price of all additions
-			const additionsPrice =
-				item?.additions?.reduce(
-					(sum, add) => sum + (add?.price || 0),
+			const addOnsTotal =
+				item.addOns?.reduce(
+					(sum, addOn) =>
+						sum + addOn.price * addOn.quantity,
 					0,
 				) || 0;
-			
-			console.log(item?.additions, additionsPrice)
-
-			// Calculate total for this item
-			const itemTotal =
-				(basePrice + additionsPrice) * item.quantity;
-
-			// Add to the running total
-			return total + itemTotal;
+			const variantsTotal =
+				item.variants?.reduce(
+					(sum, variant) =>
+						sum + variant.price * variant.quantity,
+					0,
+				) || 0;
+			return (
+				total +
+				item.basePrice * item.quantity +
+				addOnsTotal +
+				variantsTotal
+			);
 		}, 0);
 	};
-
-
-
 
 	return (
 		<nav className="bg-white z-50 bg-opacity-30 backdrop-blur-md fixed w-full border-b">
@@ -141,7 +100,7 @@ const StoreNavbar = ({
 				<div className="flex justify-between items-center h-16">
 					<div className="flex">
 						<div className="flex-shrink-0 flex items-center">
-							<Link href={`/${storeData?.storeLink}`}>
+							<Link href={`/store/${storeData?.storeLink}`}>
 								{storeData?.logoUrl ? (
 									<img
 										src={storeData?.logoUrl}
@@ -196,120 +155,92 @@ const StoreNavbar = ({
 							{cart.map((item, index) => (
 								<li
 									key={index}
-									className="flex justify-between items-start mb-4"
+									className="flex flex-col mb-4"
 								>
 									<div className="flex items-start">
 										<img
-											src={item?.image}
-											alt={item?.name}
+											src={item.image}
+											alt={item.name}
 											className="w-12 h-12 object-cover rounded"
 										/>
 										<div className="ml-4">
 											<p className="font-medium">
-												{item?.name}
+												{item.name} - x{item.quantity}
 											</p>
-											{item?.variant ? (
-												<p className="text-gray-600">
-													{item?.variant?.name} - ₦
-													{new Intl.NumberFormat(
-														'en-US',
-													).format(item?.variant?.price)}
-												</p>
-											) : (
-												<p className="text-gray-600">
-													₦
-													{new Intl.NumberFormat(
-														'en-US',
-													).format(item?.price)}
-												</p>
-											)}
-											{/* Additions */}
-											{item?.additions?.length > 0 && (
-												<div className="mt-2">
-													<p className="font-medium">
-														Additions:
+											<p className="text-gray-600">
+												₦{item.basePrice * item.quantity}
+											</p>
+											{item.variants?.map(
+												(variant, idx) => (
+													<p
+														key={idx}
+														className="text-sm text-gray-500"
+													>
+														{variant.name} - ₦
+														{variant.price} x{' '}
+														{variant.quantity}
 													</p>
-													<ul>
-														{item?.additions.map((add) => (
-															<li
-																key={add._id}
-																className="text-gray-600"
-															>
-																{add.name} - ₦
-																{new Intl.NumberFormat(
-																	'en-US',
-																).format(add.price)}
-															</li>
-														))}
-													</ul>
-												</div>
+												),
 											)}
-
-											<div className="flex items-center mt-2">
-												<button
-													onClick={() =>
-														decreaseQuantity(index)
-													}
-													className="px-2 py-1 bg-gray-200 rounded-l hover:bg-gray-300"
+											{item.addOns?.map((addOn, idx) => (
+												<p
+													key={idx}
+													className="text-sm text-gray-500"
 												>
-													-
-												</button>
-												<p className="px-4 py-1 border-t border-b">
-													{item.quantity}
+													{addOn.name} - ₦{addOn.price} x{' '}
+													{addOn.quantity}
 												</p>
-												<button
-													onClick={() =>
-														increaseQuantity(index)
-													}
-													className="px-2 py-1 bg-gray-200 rounded-r hover:bg-gray-300"
-												>
-													+
-												</button>
-											</div>
+											))}
 										</div>
-									</div>
-									<div className="flex items-center">
 										<button
+											className="mt-1 ml-5"
 											onClick={() =>
-												removeItemFromCart(index)
+												removeCartItem(item.productId)
 											}
-											className="text-red-500 hover:text-red-700 focus:outline-none"
 										>
-											<IoMdTrash className="h-5 w-5" />
+											<IoMdTrash color="red" />
 										</button>
 									</div>
 								</li>
 							))}
+							<div className="mt-10 flex text-center justify-center items-center">
+								<button
+									className="flex flex-row gap-1 items-center"
+									onClick={() => clearCart()}
+								>
+									<IoMdTrash className="text-red-400" />
+									<p className="text-center italic text-red-400">
+										Clear cart
+									</p>
+								</button>
+							</div>
 						</ul>
 					) : (
-						<p className="text-center text-gray-600">
-							Your cart is empty
-						</p>
+						<div className='flex justify-center items-center min-h-full'>
+							<p className="text-center text-2xl text-gray-600">
+								Your cart is empty
+							</p>
+						</div>
 					)}
 				</div>
 				{cart.length > 0 && (
-					<div className="p-4 border-t">
-						<p className="text-lg font-medium">
-							Total: ₦
-							{new Intl.NumberFormat('en-US').format(
-								getTotalAmount(),
-							)}
-						</p>
-						<div className="mt-4">
+					<div>
+						<div className="p-4 border-t flex flex-row items-center justify-between">
+							<p className="text-lg font-medium">Total</p>
+							<p className="text-lg font-bold">
+								₦{getTotalAmount()?.toLocaleString()}
+							</p>
+						</div>
+						<div className="px-5">
 							<button
-								onClick={() => {
-									localStorage.setItem(
-										'cart',
-										JSON.stringify(cart),
-									);
-									const url = advId
-										? `/store/${storeData?.storeLink}/checkout?ad=${advId}`
-										: `/store/${storeData?.storeLink}/checkout`;
-									router.push(url);
-								}}
-								className="w-full bg-black text-white py-2 rounded-md hover:bg-gray-900"
+								onClick={() =>
+									router.push(
+										`/store/${storeData?.storeLink}/checkout`,
+									)
+								}
+								className="w-full font-bold rounded-lg px-4 py-3 text-white bg-blue-500 hover:bg-blue-700 focus:outline-none"
 							>
-								Proceed to Checkout
+								Checkout
 							</button>
 						</div>
 					</div>

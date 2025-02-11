@@ -69,15 +69,19 @@ const Page = () => {
 
 	const handlePaymentConfirmation = async () => {
 		try {
-			const response = await axios.put(
-				`https://tradeet-api.onrender.com/orders/${orderId}/pay`,
+			const response = await axios.post(
+				`https://tradeet-api.onrender.com/orders/add-payment`,
 				{
-					type: 'bank',
-					status: 'completed',
-					statusUpdatedAt: Date.now(),
+					orderId: orderId,
+					amount: amount,
+					method: 'transfer',
 				},
 			);
-			if (response.data.statusText === 'success') {
+			console.log(response.data);
+			if (
+				response.data.message ===
+				'Payment added successfully.'
+			) {
 				toast.success('Payment complete');
 				router.push(
 					`/store/${storeLink}/orders/${orderId}`,
@@ -100,7 +104,6 @@ const Page = () => {
 			name: product.name,
 			quantity: product.quantity,
 			price: product.price,
-			image: product.images[0],
 		}),
 	);
 

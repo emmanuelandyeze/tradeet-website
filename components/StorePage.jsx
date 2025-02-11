@@ -167,8 +167,6 @@ const StorePage = ({ storeData, storeProductsData }) => {
 		return <p>Loading...</p>; // Prevents hydration issues
 	}
 
-	console.log(filteredProducts);
-
 	return (
 		<div>
 			<StoreNavbar

@@ -269,17 +269,19 @@ const Page = () => {
 					className="bg-white p-6 mt-8 shadow-md rounded-2xl"
 				>
 					<div className="flex flex-row justify-between items-center">
-						<span
-							className={`text-xs capitalize md:w-[20%] w-[23%] mb-2 flex items-start justify-start p-2 rounded-lg font-semibold ${
-								order?.status === 'pending' || 'Confirmed'
+						<div
+							className={`text-sm capitalize mb-2 flex text-center items-center justify-start py-2 px-4 rounded-lg font-semibold ${
+								order?.payment.status === 'pending'
 									? 'bg-yellow-50 text-yellow-500'
-									: order?.status === 'completed'
+									: order?.payment.status === 'completed'
 									? 'bg-green-50 text-green-500'
 									: 'bg-red-50 text-red-500'
 							}`}
 						>
-							{order?.status}
-						</span>
+							{order?.payment.status === 'completed'
+								? 'Paid'
+								: 'Not paid'}
+						</div>
 						<div className="flex flex-col items-center">
 							<p className="text-sm text-gray-400">
 								Pick-up Code
@@ -292,13 +294,6 @@ const Page = () => {
 					<h1 className="text-2xl font-bold">
 						{storeData?.name}
 					</h1>
-					<Link
-						href={`https://tradeet.ng/${storeData?.storeLink}`}
-						target="_blank"
-						className="text-blue-500"
-					>
-						tradeet.ng/{storeData?.storeLink}
-					</Link>
 					<div className="my-5">
 						<div className="text-sm flex flex-row gap-3">
 							<p>Order No.</p>
@@ -324,13 +319,13 @@ const Page = () => {
 										</p>
 										<p className="text-sm font-normal text-blue-500 underline-offset-2 pr-3">
 											{item.name}
-											{item?.additions?.length > 0 && (
+											{item?.addOns?.length > 0 && (
 												<div className="mt-2">
 													<p className="font-sm">
 														Add-ons:
 													</p>
 													<ul>
-														{item?.additions.map((add) => (
+														{item?.addOns.map((add) => (
 															<li
 																key={add._id}
 																className="text-gray-600"
@@ -359,7 +354,9 @@ const Page = () => {
 												₦
 												{new Intl.NumberFormat(
 													'en-US',
-												).format(item?.price)}
+												).format(
+													item?.basePrice * item?.quantity,
+												)}
 											</p>
 										)}
 									</div>
@@ -373,8 +370,19 @@ const Page = () => {
 							<p>Items total ({order?.items?.length})</p>
 							<p>₦{order?.itemsAmount}</p>
 						</div>
+						{order?.deliveryFee > 0 && (
+							<div className="flex flex-row justify-between items-center text-sm">
+								<p>Delivery Fee</p>
+								<p>₦{order?.deliveryFee}</p>
+							</div>
+						)}
+						<div className="flex flex-row justify-between items-center text-sm">
+							<p>Service Fee</p>
+							<p>₦{order?.serviceFee}</p>
+						</div>
 					</div>
 					<hr />
+
 					{order?.discountCode && (
 						<div>
 							<div className="my-3">
@@ -409,19 +417,21 @@ const Page = () => {
 									{order?.customerInfo?.contact}
 								</p>
 							</div>
-							{/* <div className="text-sm mt-2">
+							<div className="text-sm mt-2">
 								<p className="text-xs text-gray-500">
-									Delivery Option
+									Delivery Option (
+									{order?.customerInfo?.pickUp
+										? 'pick-up'
+										: 'delivery'}
+									)
 								</p>
 								<p className="capitalize">
-									{order?.serviceType}{' '}
-									{order?.serviceType === 'self-pickup' &&
-										`/ ${storeData?.address}`}{' '}
-									
-									{order?.serviceType === 'delivery' &&
-										`/ ${order?.address}, ${order?.state} (${order?.deliveryCompany})`}
+									{order?.customerInfo?.pickUp &&
+										`${storeData?.address}`}{' '}
+									{!order?.customerInfo?.pickUp &&
+										`${order?.customerInfo?.address}`}
 								</p>
-							</div> */}
+							</div>
 						</div>
 					</div>
 				</div>

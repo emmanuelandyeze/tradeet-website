@@ -17,7 +17,7 @@ const NormalStoreNavbar = ({ storeData }) => {
 				<div className="flex justify-between items-center h-16">
 					<div className="flex">
 						<div className="flex-shrink-0 flex items-center">
-							<Link href={`/${storeData?.storeLink}`} className='flex flex-row items-center gap-2'>
+							<Link href={`/store/${storeData?.storeLink}`} className='flex flex-row items-center gap-2'>
 								<img
 									src={storeData?.logoUrl}
 									className="h-12 w-12 rounded-full md:h-14 md:w-14 object-contain"
