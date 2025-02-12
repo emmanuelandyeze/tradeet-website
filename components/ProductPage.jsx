@@ -10,68 +10,59 @@ const ProductPage = ({ productData, storeData }) => {
 	const [isCartOpen, setIsCartOpen] = useState(false);
 	const [cart, setCart] = useState([]);
 	const [productQuantity, setProductQuantity] = useState(1);
-	const [variantQuantities, setVariantQuantities] =
-		useState({});
+	const [selectedVariant, setSelectedVariant] = useState(
+		productData._id,
+	); // Default to main product
 	const [addOnQuantities, setAddOnQuantities] = useState(
 		{},
 	);
+	const [specialInstructions, setSpecialInstructions] =
+		useState(''); // New state for special instructions
 
+	// Include the main product in the variants list
+	const productVariants = [
+		{
+			_id: productData._id,
+			name: productData.name,
+			price: productData.price,
+		},
+		...(productData.variants || []),
+	];
+
+	// Initialize Add-On Quantities
 	useEffect(() => {
 		if (productData?.addOns) {
 			const initialAddOnQuantities = {};
-			productData.addOns.forEach((addition) => {
-				initialAddOnQuantities[addition._id] =
-					addition.compulsory ? 1 : 0;
+			productData.addOns.forEach((addOn) => {
+				initialAddOnQuantities[addOn._id] = addOn.compulsory
+					? 1
+					: 0;
 			});
 			setAddOnQuantities(initialAddOnQuantities);
 		}
-		if (productData?.variants) {
-			const initialVariantQuantities = {};
-			productData.variants.forEach((variant) => {
-				initialVariantQuantities[variant._id] = 0;
-			});
-			setVariantQuantities(initialVariantQuantities);
-		}
 	}, [productData]);
 
-	const handleProductQuantityChange = (newQuantity) => {
-		setProductQuantity(Math.max(newQuantity, 1));
-	};
-
-	const handleVariantQuantityChange = (
-		variantId,
-		newQuantity,
-	) => {
-		setVariantQuantities((prevQuantities) => ({
-			...prevQuantities,
-			[variantId]: Math.max(newQuantity, 0),
-		}));
+	const handleVariantSelection = (variantId) => {
+		setSelectedVariant(variantId);
 	};
 
 	const handleAddOnQuantityChange = (
-		additionId,
+		addOnId,
 		newQuantity,
 		compulsory,
 	) => {
 		setAddOnQuantities((prevQuantities) => ({
 			...prevQuantities,
-			[additionId]: compulsory
-				? 1
-				: Math.max(newQuantity, 0),
+			[addOnId]: compulsory ? 1 : Math.max(newQuantity, 0),
 		}));
 	};
 
+	// Calculate Total Price
+	const selectedVariantData = productVariants.find(
+		(v) => v._id === selectedVariant,
+	);
 	const totalPrice =
-		productData.price * productQuantity +
-		Object.entries(variantQuantities).reduce(
-			(acc, [variantId, qty]) => {
-				const variant = productData.variants.find(
-					(v) => v._id === variantId,
-				);
-				return acc + (variant ? variant.price * qty : 0);
-			},
-			0,
-		) +
+		(selectedVariantData?.price || 0) * productQuantity +
 		Object.entries(addOnQuantities).reduce(
 			(acc, [addOnId, qty]) => {
 				const addOn = productData.addOns.find(
@@ -83,17 +74,6 @@ const ProductPage = ({ productData, storeData }) => {
 		);
 
 	const addToCart = () => {
-		const selectedVariants = productData.variants
-			.filter(
-				(variant) => variantQuantities[variant._id] > 0,
-			)
-			.map((variant) => ({
-				_id: variant._id,
-				name: variant.name,
-				price: variant.price,
-				quantity: variantQuantities[variant._id],
-			}));
-
 		const selectedAddOns = productData.addOns
 			.filter((addOn) => addOnQuantities[addOn._id] > 0)
 			.map((addOn) => ({
@@ -104,16 +84,16 @@ const ProductPage = ({ productData, storeData }) => {
 			}));
 
 		const cartItem = {
-			productId: productData._id,
-			name: productData.name,
+			productId: selectedVariantData._id,
+			name: selectedVariantData.name,
 			image: productData.image,
-			basePrice: productData.price,
+			basePrice: selectedVariantData.price,
 			quantity: productQuantity,
 			totalPrice,
-			variants: selectedVariants,
 			addOns: selectedAddOns,
+			specialInstructions, // Store user input in the cart
 			category: productData?.category.name,
-			storeId: productData?.storeId
+			storeId: productData?.storeId,
 		};
 
 		setCart((prevCart) => {
@@ -126,8 +106,6 @@ const ProductPage = ({ productData, storeData }) => {
 		});
 	};
 
-	console.log(productData)
-
 	return (
 		<div>
 			<StoreNavbar
@@ -137,6 +115,8 @@ const ProductPage = ({ productData, storeData }) => {
 				isCartOpen={isCartOpen}
 				setIsCartOpen={setIsCartOpen}
 			/>
+
+			{/* Back Button */}
 			<div
 				onClick={() =>
 					router.push(`/store/${storeData?.storeLink}`)
@@ -148,31 +128,65 @@ const ProductPage = ({ productData, storeData }) => {
 					Back to Store
 				</h1>
 			</div>
+
+			{/* Product Display */}
 			<div className="pt-4 px-4 flex flex-col lg:flex-row items-start justify-between gap-5 w-full max-w-4xl mx-auto">
 				<img
 					src={productData.image}
 					alt={productData.name}
-					className="w-full lg:w-[50%] lg:h-96 h-80 p-0 bg-gray-100 mb-4 my-2 object-cover rounded-lg"
+					className="w-full lg:w-[50%] lg:h-96 h-80 bg-gray-100 mb-4 my-2 object-cover rounded-lg"
 				/>
+
+				{/* Product Details */}
 				<div className="w-full pt-2 lg:w-50%">
 					<h2 className="text-3xl font-bold capitalize mb-2 pb-3">
 						{productData.name}
 					</h2>
 					{productData?.description && (
 						<p className="text-md font-light mb-2">
-							{productData?.description}
+							{productData.description}
 						</p>
 					)}
 					<hr />
+
+					{/* Variants Selection (Includes Main Product) */}
+					<div className="my-4">
+						<p className="font-bold">Choose an option:</p>
+						{productVariants.map((variant) => (
+							<div
+								key={variant._id}
+								className="flex justify-between items-center my-2"
+							>
+								<label className="flex items-center gap-3">
+									<input
+										type="radio"
+										name="variant"
+										value={variant._id}
+										checked={
+											selectedVariant === variant._id
+										}
+										onChange={() =>
+											handleVariantSelection(variant._id)
+										}
+									/>
+									<span>
+										{variant.name} - ₦
+										{variant.price?.toLocaleString()}
+									</span>
+								</label>
+							</div>
+						))}
+					</div>
+					<hr />
+
+					{/* Quantity Selection */}
 					<div className="flex justify-between items-center my-4">
-						<p className='font-bold'>
-							{productData.name} - ₦{productData.price}
-						</p>
+						<p className="font-bold">Quantity</p>
 						<div className="flex items-center border rounded-lg">
 							<button
 								onClick={() =>
-									handleProductQuantityChange(
-										productQuantity - 1,
+									setProductQuantity(
+										Math.max(productQuantity - 1, 1),
 									)
 								}
 								className="bg-gray-200 px-4 py-2"
@@ -184,9 +198,7 @@ const ProductPage = ({ productData, storeData }) => {
 							</span>
 							<button
 								onClick={() =>
-									handleProductQuantityChange(
-										productQuantity + 1,
-									)
+									setProductQuantity(productQuantity + 1)
 								}
 								className="bg-gray-200 px-4 py-2"
 							>
@@ -195,43 +207,8 @@ const ProductPage = ({ productData, storeData }) => {
 						</div>
 					</div>
 					<hr />
-					{productData.variants?.map((variant) => (
-						<div
-							key={variant._id}
-							className="flex justify-between items-center my-4"
-						>
-							<p>
-								{variant.name} (+₦{variant.price})
-							</p>
-							<div className="flex items-center border rounded-lg">
-								<button
-									onClick={() =>
-										handleVariantQuantityChange(
-											variant._id,
-											variantQuantities[variant._id] - 1,
-										)
-									}
-									className="bg-gray-200 px-4 py-2"
-								>
-									-
-								</button>
-								<span className="mx-4">
-									{variantQuantities[variant._id]}
-								</span>
-								<button
-									onClick={() =>
-										handleVariantQuantityChange(
-											variant._id,
-											variantQuantities[variant._id] + 1,
-										)
-									}
-									className="bg-gray-200 px-4 py-2"
-								>
-									+
-								</button>
-							</div>
-						</div>
-					))}
+
+					{/* Add-Ons */}
 					{productData.addOns?.map((addOn) => (
 						<div
 							key={addOn._id}
@@ -271,10 +248,26 @@ const ProductPage = ({ productData, storeData }) => {
 							</div>
 						</div>
 					))}
-					<hr />
+
+					{/* Special Instructions */}
+					<div className="my-4">
+						<p className="font-bold">
+							Special Instructions (Optional)
+						</p>
+						<textarea
+							className="w-full p-2 border rounded-lg"
+							placeholder="E.g., No onions, extra spicy..."
+							value={specialInstructions}
+							onChange={(e) =>
+								setSpecialInstructions(e.target.value)
+							}
+						></textarea>
+					</div>
+
+					{/* Add to Cart Button */}
 					<div className="flex justify-between items-center my-4">
 						<p className="text-lg font-semibold">
-							Total Price: ₦{totalPrice}
+							Total Price: ₦{totalPrice?.toLocaleString()}
 						</p>
 						<button
 							onClick={addToCart}
@@ -291,3 +284,4 @@ const ProductPage = ({ productData, storeData }) => {
 };
 
 export default ProductPage;
+

@@ -368,17 +368,19 @@ const Page = () => {
 					<div className="my-3">
 						<div className="flex flex-row justify-between items-center text-sm">
 							<p>Items total ({order?.items?.length})</p>
-							<p>₦{order?.itemsAmount}</p>
+							<p>₦{order?.itemsAmount?.toLocaleString()}</p>
 						</div>
 						{order?.deliveryFee > 0 && (
 							<div className="flex flex-row justify-between items-center text-sm">
 								<p>Delivery Fee</p>
-								<p>₦{order?.deliveryFee}</p>
+								<p>
+									₦{order?.deliveryFee?.toLocaleString()}
+								</p>
 							</div>
 						)}
 						<div className="flex flex-row justify-between items-center text-sm">
 							<p>Service Fee</p>
-							<p>₦{order?.serviceFee}</p>
+							<p>₦{order?.serviceFee?.toLocaleString()}</p>
 						</div>
 					</div>
 					<hr />
@@ -399,7 +401,7 @@ const Page = () => {
 							<p className="font-bold text-md">
 								Amount Paid
 							</p>
-							<p>₦{order?.totalAmount}</p>
+							<p>₦{order?.totalAmount?.toLocaleString()}</p>
 						</div>
 					</div>
 					<hr />

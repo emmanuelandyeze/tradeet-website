@@ -230,7 +230,7 @@ const CheckoutPage = () => {
 	const serviceFee =
 		totalAmount < 500
 			? 0
-			: Math.min(totalAmount * 0.1, 2000);
+			: Math.min(totalAmount * 0.1, 500);
 
 	const finalTotal = totalAmount + serviceFee;
 
