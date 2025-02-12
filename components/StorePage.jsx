@@ -182,7 +182,7 @@ const StorePage = ({ storeData, storeProductsData }) => {
 						<img
 							src={storeData?.storeBanner}
 							alt={storeData?.name}
-							className="w-full h-48 md:h-96 p-0 bg-gray-100 object-cover shadow-md rounded-xl"
+							className="w-full h-48 md:h-[26rem] p-0 bg-gray-100 md:object-cover object-cover shadow-md rounded-xl"
 						/>
 					</div>
 				) : (
@@ -215,7 +215,7 @@ const StorePage = ({ storeData, storeProductsData }) => {
 					</h1>
 				</div> */}
 				{/* Categories as clickable cards */}
-				<div className="flex overflow-x-auto space-x-4 py-4 mb-6">
+				<div className="flex overflow-x-auto space-x-2 pb-4 mb-3">
 					{/* "All" category */}
 					<div
 						className={`px-6 py-2 bg-gray-200 rounded-lg cursor-pointer min-w-max ${
@@ -225,14 +225,16 @@ const StorePage = ({ storeData, storeProductsData }) => {
 						}`}
 						onClick={() => handleCategorySelect('All')}
 					>
-						<h3 className="text-lg font-semibold">All</h3>
+						<h3 className="text-xs md:text-md font-semibold">
+							All
+						</h3>
 					</div>
 
 					{/* Other categories */}
 					{categories?.map((category) => (
 						<div
 							key={category._id}
-							className={`px-6 py-2 bg-gray-200 rounded-lg cursor-pointer min-w-max ${
+							className={`px-6 py-2 bg-gray-200 rounded-lg text-xs md:text-md cursor-pointer min-w-max ${
 								selectedCategory === category.name
 									? 'bg-green-600 text-white'
 									: 'hover:bg-gray-300'
@@ -241,12 +243,9 @@ const StorePage = ({ storeData, storeProductsData }) => {
 								handleCategorySelect(category.name)
 							}
 						>
-							<h3 className="text-lg font-semibold">
+							<h3 className="text-xs md:text-md font-semibold">
 								{category.name}
 							</h3>
-							<p className="text-sm">
-								{category.description}
-							</p>
 						</div>
 					))}
 				</div>
@@ -261,24 +260,22 @@ const StorePage = ({ storeData, storeProductsData }) => {
 								)
 							}
 						>
-							{/* <div className="absolute top-2 right-2 bg-red-600 text-white text-xs font-bold px-2 py-1 rounded-md shadow-sm">
-								-10%
-							</div> */}
+							
 
 							<img
 								src={product.image}
 								alt={product.name}
-								className="w-full h-48 md:h-60 p-0 bg-gray-100 object-cover rounded-t-xl"
+								className="w-full h-40 md:h-60 p-0 bg-gray-100 object-cover rounded-t-xl"
 							/>
-							<div className="mb-2 mt-0 px-2">
+							<div className="mb-0 mt-0 px-2">
 								<h2 className="text-md capitalize md:text-lg pt-3 font-medium truncate">
 									{product.name}
 								</h2>
-								<p className="text-gray-500">
+								<p className="text-gray-500 text-xs md:text-sm">
 									{product?.category?.name}
 								</p>
 
-								<p className="text-gray-700 flex flex-row items-start gap-1 mt-2 pb-2 text-lg font-normal md:text-md">
+								<p className="text-gray-700 flex flex-row items-start gap-1 mt-2 pb-2 text-md md:text-lg font-normal md:text-md">
 									<span className="text-slate-900 font-semibold">
 										₦{' '}
 										{new Intl.NumberFormat('en-US').format(
