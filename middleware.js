@@ -2,13 +2,15 @@ import { NextRequest, NextResponse } from 'next/server';
 
 export function middleware(req) {
 	const host = req.headers.get('host') || '';
-	const subdomain = host.split('.')[0]; // Extract subdomain
+	const subdomain = host.split('.')[0];
 
-	if (subdomain !== 'tradeet' && subdomain !== 'www') {
-		const url = req.nextUrl.clone();
-		url.pathname = `/store/${subdomain}`; // Redirect to the correct store route
-		return NextResponse.rewrite(url);
+	// Ignore main domain (tradeet.ng) and www
+	if (host === 'tradeet.ng' || host === 'www.tradeet.ng') {
+		return NextResponse.next();
 	}
 
-	return NextResponse.next();
+	// Redirect all subdomains (excluding main domain) to store pages
+	const url = req.nextUrl.clone();
+	url.pathname = `/store/${subdomain}`;
+	return NextResponse.rewrite(url);
 }
