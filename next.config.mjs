@@ -1,13 +1,15 @@
 export default {
-	experimental: {
-		appDir: true,
-	},
 	async rewrites() {
 		return [
 			{
-				source: '/',
-				has: [{ type: 'host', value: '*.tradeet.ng' }],
-				destination: '/store',
+				source: '/:path*',
+				has: [
+					{
+						type: 'host',
+						value: '([a-zA-Z0-9-]+)\\.tradeet\\.ng',
+					},
+				], // Correct regex for subdomains
+				destination: '/store/:path*', // Redirect subdomains to /store/{subdomain}
 			},
 		];
 	},
