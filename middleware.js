@@ -15,7 +15,8 @@ export function middleware(req) {
 		pathname.startsWith('/_next') || // Next.js assets
 		pathname.startsWith('/static') || // Static files
 		pathname.startsWith('/favicon') || // Favicon
-		pathname.startsWith('/api') // API routes
+		pathname.startsWith('/api') ||
+		pathname.startsWith('/store')
 	) {
 		return NextResponse.next();
 	}
