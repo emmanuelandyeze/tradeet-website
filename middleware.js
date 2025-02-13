@@ -2,22 +2,27 @@ import { NextRequest, NextResponse } from 'next/server';
 
 export function middleware(req) {
 	const host = req.headers.get('host') || '';
-	const pathname = req.nextUrl.pathname;
+	const subdomain = host.split('.')[0];
 
-	// Extract subdomain
-	const [subdomain] = host.split('.');
-
-	// If it's the main domain or 'www', allow normal routing
+	// Ignore the main domain and www
 	if (host === 'tradeet.ng' || host === 'www.tradeet.ng') {
 		return NextResponse.next();
 	}
 
-	// If request is already a store path like /store/xyz, prevent mismatches
-	if (pathname.startsWith('/store')) {
-		return NextResponse.rewrite(new URL('/', req.url)); // Redirect back to home
+	// Allow static assets like JS, CSS, and images to load properly
+	const pathname = req.nextUrl.pathname;
+	if (
+		pathname.startsWith('/_next') || // Next.js assets
+		pathname.startsWith('/static') || // Static files
+		pathname.startsWith('/favicon') || // Favicon
+		pathname.startsWith('/api') ||
+		pathname.startsWith('/store')
+	) {
+		return NextResponse.next();
 	}
 
-	// Rewrite requests to go to the correct store page dynamically
-	req.nextUrl.pathname = `/store/${subdomain}${pathname}`;
-	return NextResponse.rewrite(req.nextUrl);
+	// Rewrite subdomains to their respective store pages
+	const url = req.nextUrl.clone();
+	url.pathname = `/store/${subdomain}`;
+	return NextResponse.rewrite(url);
 }
