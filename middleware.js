@@ -1,16 +1,13 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 
 export function middleware(req) {
-	const { nextUrl } = req;
-	const hostname = req.headers.get('host') || '';
+	const host = req.headers.get('host') || '';
+	const subdomain = host.split('.')[0]; // Extract subdomain
 
-	if (hostname.endsWith('tradeet.ng')) {
-		const subdomain = hostname.split('.')[0]; // Extract subdomain (storename)
-
-		if (subdomain !== 'tradeet') {
-			nextUrl.pathname = `/store/${subdomain}`; // Redirect to store page
-			return NextResponse.rewrite(nextUrl);
-		}
+	if (subdomain !== 'tradeet' && subdomain !== 'www') {
+		const url = req.nextUrl.clone();
+		url.pathname = `/store/${subdomain}`; // Redirect to the correct store route
+		return NextResponse.rewrite(url);
 	}
 
 	return NextResponse.next();
