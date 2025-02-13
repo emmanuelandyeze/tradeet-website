@@ -94,6 +94,7 @@ export default function RootLayout({ children }) {
 				className={` ${openSans.className} antialiased`}
 			>
 				{children}
+				<Analytics />
 			</body>
 		</html>
 	);
