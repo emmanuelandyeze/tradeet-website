@@ -92,7 +92,7 @@ const SectionOne = () => {
 						</div>
 					</div>
 					<img
-						src="https://s3-alpha-sig.figma.com/img/8949/7df9/1424c73e89eb94a3b4993d9fc2b37c2e?Expires=1739750400&Key-Pair-Id=APKAQ4GOSFWCW27IBOMQ&Signature=cJ0hZMfrKNUeJwl7A-NsmkjD9ZU-9ZGCFdPyadKILkFsK1bEPKQ7uOsfS4L89TtTkK86IgSxCky1kFXqy~wrBrcj6Z8CYJhjgv3ub7RgLbFSDMYxbnZWQJGkY89L98gFPLYG23iT7iKay2GQ8zybkk1-aYoiOnBcusU1rd4sPfyumV6oNDT-oCHLEwNt39VUdf13talkrErAYEOFGcVDlhJIap6ubtM77N6K-PzP80S19PKsFXMnazBbui15DdOU5-5xrxQZcE3UiDjpLzrW1q5UbEvb9r0o~VoXW-KpDAWpPgQbVU8gij1633jmWMzoTZA-pGoPLMC5wOOl8HI~8Q__"
+						src="/images/woman.png"
 						alt="Picture of a woman"
 						className="pr-0 -right-0 md:right-32 overflow-hidden object-cover absolute w-[90%] h-[20rem] md:w-[38rem] md:h-[31rem] mt-4 md:mt-0"
 					/>
