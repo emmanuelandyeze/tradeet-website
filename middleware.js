@@ -4,8 +4,13 @@ export function middleware(req) {
 	const host = req.headers.get('host') || '';
 	const subdomain = host.split('.')[0];
 
-	// Ignore the main domain and www
-	if (host === 'tradeet.ng' || host === 'www.tradeet.ng') {
+	// Ignore the main domain, www, and localhost
+	if (
+		host === 'tradeet.ng' ||
+		host === 'www.tradeet.ng' ||
+		host === 'localhost:3000' || // Add your local development environment
+		host.startsWith('localhost:') // Catch all localhost ports
+	) {
 		return NextResponse.next();
 	}
 

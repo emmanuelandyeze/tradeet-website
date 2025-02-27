@@ -7,7 +7,7 @@ const HeroSection = () => {
 			className="relative w-full h-[70vh] md:h-[90vh] bg-cover bg-center"
 			style={{
 				backgroundImage:
-					'url("https://s3-alpha-sig.figma.com/img/e68c/bdb4/2457b9483b7afd9e500886f86324eeed?Expires=1739750400&Key-Pair-Id=APKAQ4GOSFWCW27IBOMQ&Signature=Xe05XIniUgZU1eAxQ2T7SVBdrYqpn3pFfd~h4n76WdNWfTcVSeFd6GijgZVtnAElOJLwc-zWHK689Uex50xizA2SadPvkP7FaOl3D1rv6UtT9unqPdgCRUVvT11yrOSw3AFaxcLyJh9A~eBUC~FHderajIIRCj-lZgBcer21AVolb5D9wRdkO-wtlJVaJoxDoPIDVFLdyP~E1ma3Zl~Fg168OSYLZUP-UXarnd68wSzsubxJwM7I6x48-aO~~mCgYwQTNsv3mqKHhbT7fppHe9mnds1hdn1ID9PzrMECblHKZo3U~Tx171hm98NKn-U460se8XWoAI77W9GwiKJcAg__")',
+					'url("/images/landing.jpg")',
 			}}
 		>
 			{/* Overlay */}

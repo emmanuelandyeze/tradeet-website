@@ -14,7 +14,7 @@ export default function Home() {
 			<div className="bg-[#2DCC70] bg-opacity-20">
 				<SectionTwo />
 			</div>
-			<Footer />
+			{/* <Footer /> */}
 		</div>
 	);
 }
