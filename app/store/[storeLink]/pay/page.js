@@ -112,7 +112,7 @@ const Page = () => {
 		email: email,
 		amount: amount * 100,
 		publicKey:
-			'pk_test_b73dfa772179733254e4372f9bf2be4428f28d93',
+			'pk_live_9ed31e08b1843a6818e392764c8dd6ac8457ea23',
 		metadata: {
 			products: formattedProducts,
 		},
