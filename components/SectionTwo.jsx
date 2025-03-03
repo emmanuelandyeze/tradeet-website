@@ -16,7 +16,7 @@ const SectionTwo = () => {
 				<div className="flex flex-col gap-5 mt-8">
 					<div className="flex flex-row gap-2 items-start">
 						<GiDiamonds color="#00C853" size={40} />
-						<p className='md:w-[80%]'>
+						<p className="md:w-[80%]">
 							Promote your products to new audience beyond
 							your contacts
 						</p>
@@ -36,10 +36,13 @@ const SectionTwo = () => {
 					</div>
 				</div>
 				<div>
-					<button className="bg-[#17412D] hover:bg-[#17412D] flex flex-row items-center gap-3 text-white py-2 px-4 mt-8 rounded-[20px] text-md">
+					<a
+						href="https://play.google.com/store/apps/details?id=com.tradeet.vendor&hl=en"
+						className="bg-[#17412D] hover:bg-[#17412D] flex flex-row items-center gap-3 text-white py-2 px-4 mt-8 rounded-[20px] text-md"
+					>
 						<p>Launch your business</p>
 						<BsArrowRightCircleFill size={24} />
-					</button>
+					</a>
 				</div>
 				<div className="mt-10 w-[100%]">
 					<img
@@ -59,27 +62,30 @@ const SectionTwo = () => {
 					<div className="flex flex-row gap-2 items-start">
 						<GiDiamonds color="#005d0f" size={40} />
 						<p>
-							Geolocation connects local buyers to your store without hassle
+							Geolocation connects local buyers to your
+							store without hassle
 						</p>
 					</div>
 					<div className="flex flex-row gap-2 items-start">
 						<GiDiamonds color="#005d0f" size={25} />
-						<p>
-							Curated deals attract customers
-						</p>
+						<p>Curated deals attract customers</p>
 					</div>
 					<div className="flex flex-row gap-2 items-start">
 						<GiDiamonds color="#005d0f" size={40} />
 						<p>
-							Maintain a steady stream of sales even in a competitive market
+							Maintain a steady stream of sales even in a
+							competitive market
 						</p>
 					</div>
 				</div>
 				<div>
-					<button className="bg-[#00C853] hover:bg-[#17412D] flex flex-row items-center gap-3 text-white py-2 px-4 mt-8 rounded-[20px] text-md">
+					<a
+						href="https://play.google.com/store/apps/details?id=com.tradeet.vendor&hl=en"
+						className="bg-[#00C853] hover:bg-[#17412D] flex flex-row items-center gap-3 text-white py-2 px-4 mt-8 rounded-[20px] text-md"
+					>
 						<p>Launch your business</p>
 						<BsArrowRightCircleFill size={24} />
-					</button>
+					</a>
 				</div>
 				<div className="mt-10 w-[100%]">
 					<Image

@@ -30,10 +30,10 @@ const HeroSection = () => {
 					online presence, and market your brand, all in one
 					place.
 				</p>
-				<button className="bg-[#FFF] flex flex-row gap-2 items-center inter-font hover:bg-gray-50 text-[#121212] font-bold py-3 md:py-4 px-6 rounded-lg text-md md:text-xl">
+				<a href='https://play.google.com/store/apps/details?id=com.tradeet.vendor&hl=en' className="bg-[#FFF] flex flex-row gap-2 items-center inter-font hover:bg-gray-50 text-[#121212] font-bold py-3 md:py-4 px-6 rounded-lg text-md md:text-xl">
 					<span>Get started</span>
 					<FaArrowRight />
-				</button>
+				</a>
 			</div>
 		</section>
 	);

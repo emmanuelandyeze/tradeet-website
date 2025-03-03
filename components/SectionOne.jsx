@@ -39,10 +39,13 @@ const SectionOne = () => {
 						operations - no coding needed.
 					</p>
 					<div>
-						<button className="bg-[#17412D] hover:bg-[#17412D] flex flex-row items-center gap-3 text-white py-2 px-4 mt-8 rounded-[20px] text-md">
+						<a
+							href="https://play.google.com/store/apps/details?id=com.tradeet.vendor&hl=en"
+							className="bg-[#17412D] hover:bg-[#17412D] flex flex-row items-center gap-3 text-white py-2 px-4 mt-8 rounded-[20px] text-md"
+						>
 							<p>Launch your business</p>
 							<BsArrowRightCircleFill size={24} />
-						</button>
+						</a>
 					</div>
 				</div>
 				<div className="bg-[#F7FCE7] flex flex-row md:h-[50vh] h-[40vh] rounded-[20px] items-center px-0 w-full md:w-[70%] my-0">
