@@ -133,15 +133,15 @@ const StoreLocationPicker = ({store, setDeliveryFee, setLandmark}) => {
 		);
 		// Base charge of ₦400 for 0-3 km
 		const charge =
-			400 +
-			Math.max(0, Math.ceil((distance - 2.5) / 2.5) * 400);
+			250 +
+			Math.max(0, Math.ceil((distance - 2.5) / 2.5) * 250);
 		return Math.min(charge, 1000000); // Cap at ₦1,000,000
 	};
 
 	// Example Usage
 	const storeLocation = {
-		latitude: store.location.coordinates[1],
-		longitude: store.location.coordinates[0],
+		latitude: store?.location?.coordinates[1],
+		longitude: store?.location?.coordinates[0],
 	}; // Example store (Lagos)
 	const userLocation = { latitude: 6.6, longitude: 3.35 }; // Example user
 

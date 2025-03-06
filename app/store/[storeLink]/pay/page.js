@@ -71,7 +71,9 @@ const Page = () => {
 		try {
 			const response = await axios.post(
 				`https://tradeet-api.onrender.com/orders/add-payment`,
+				// 'http://192.168.136.140:5000/orders/add-payment',
 				{
+					storeId: store?._id,
 					orderId: orderId,
 					amount: amount,
 					method: 'transfer',

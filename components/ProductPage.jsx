@@ -4,6 +4,7 @@ import { useRouter } from 'next/navigation';
 import { useState, useEffect } from 'react';
 import { FaChevronLeft } from 'react-icons/fa';
 import { RotatingSquare } from 'react-loader-spinner';
+import { toast } from 'react-toastify';
 
 const ProductPage = ({ productData, storeData }) => {
 	const router = useRouter();
@@ -18,6 +19,8 @@ const ProductPage = ({ productData, storeData }) => {
 	);
 	const [specialInstructions, setSpecialInstructions] =
 		useState(''); // New state for special instructions
+	
+	const notify = () => toast('Item added to cart!');
 
 	// Include the main product in the variants list
 	const productVariants = [
@@ -104,6 +107,7 @@ const ProductPage = ({ productData, storeData }) => {
 			); // Save cart to localStorage
 			return updatedCart;
 		});
+		notify(); // Show notification when item is added to cart
 	};
 
 	return (

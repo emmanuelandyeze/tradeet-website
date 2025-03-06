@@ -8,11 +8,11 @@ import {
 	useSearchParams,
 } from 'next/navigation';
 import axiosClient from '@/utils/axios';
-import toast from 'react-hot-toast';
 import axios from 'axios';
 import { getStoreData } from '@/app/lib/api';
 import StoreLocationPicker from '@/components/StoreLocationPicker';
 import NormalStoreNavbar from '@/components/NormalStoreNav';
+import { toast } from 'react-toastify';
 
 const countryCodes = [{ code: '+234', country: 'Nigeria' }];
 
@@ -25,7 +25,7 @@ const CheckoutPage = () => {
 		whatsapp: '',
 	});
 	const [serviceType, setServiceType] =
-		useState('self-pickup');
+		useState('delivery');
 	const [address, setAddress] = useState('');
 	const [modalIsOpen, setModalIsOpen] = useState(false);
 	const [discountCode, setDiscountCode] = useState('');
@@ -149,7 +149,10 @@ const CheckoutPage = () => {
 
 	const validateFields = () => {
 		if (!userDetails.name || !userDetails.whatsapp) {
-			toast.error('Please fill in all customer details.');
+			const notify = toast(
+				'Please fill in all customer details.',
+			);
+			notify();
 			return false;
 		}
 
@@ -157,14 +160,16 @@ const CheckoutPage = () => {
 			serviceType === 'delivery' &&
 			(!address || !landmark)
 		) {
-			toast.error(
+			const notify = toast(
 				'Please fill in the delivery address and select a nearest landmark.',
 			);
+			notify();
 			return false;
 		}
 
 		if (cart.length === 0) {
-			toast.error('Your cart is empty.');
+			const notify = toast('Your cart is empty.');
+			notify();
 			return false;
 		}
 
@@ -228,9 +233,9 @@ const CheckoutPage = () => {
 		discountAmount;
 
 	const serviceFee =
-		totalAmount < 500
-			? 0
-			: Math.min(totalAmount * 0.1, 500);
+		totalAmount < 1500
+			? 50
+			: Math.min(totalAmount * 0.1, 1500);
 
 	const finalTotal = totalAmount + serviceFee;
 
@@ -301,7 +306,7 @@ const CheckoutPage = () => {
 
 			const response = await axios.post(
 				`https://tradeet-api.onrender.com/orders`,
-				// 'http://192.168.1.159:5000/orders',
+				// 'http://192.168.136.140:5000/orders',
 				orderData,
 			);
 
@@ -563,22 +568,23 @@ const CheckoutPage = () => {
 										</p>
 									</div>
 								)}
-								{discountInfo && (
-									<div className="flex flex-row gap-14 items-center">
-										<p className="text-sm text-red-500">
-											Discount
-										</p>
-										<p className="text-sm text-red-500">
-											₦{discountAmount?.toLocaleString()}
-										</p>
-									</div>
-								)}
+
 								<div className="flex flex-row gap-14 items-center">
 									<p className="text-sm">Service fee</p>
 									<p className="text-sm">
 										₦{serviceFee?.toLocaleString()}
 									</p>
 								</div>
+								{discountInfo && (
+									<div className="flex flex-row gap-14 items-center">
+										<p className="text-sm font-bold text-red-500">
+											Discount
+										</p>
+										<p className="text-sm font-bold text-red-500">
+											- ₦{discountAmount?.toLocaleString()}
+										</p>
+									</div>
+								)}
 								<div className="flex flex-row gap-14 items-center">
 									<p className="text-lg font-bold">Total</p>
 									<p className="text-lg font-bold">
