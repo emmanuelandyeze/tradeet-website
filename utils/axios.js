@@ -3,7 +3,7 @@
 import axios from 'axios';
 
 const axiosClient = axios.create({
-	baseURL: 'http://192.168.1.159:5000', // Example base URL, replace with your API URL
+	baseURL: 'https://tradeet-api.onrender.com', // Example base URL, replace with your API URL
 	// timeout: 5000, // Timeout in milliseconds
 	// 'https://tradeet-api.vercel.app'
 	// http://localhost:9000
