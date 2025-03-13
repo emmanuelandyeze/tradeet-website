@@ -398,7 +398,7 @@ const CheckoutPage = () => {
 						{/* Delivery / Pickup Section */}
 						<div className="border-[1px] border-gray-200 p-4 mb-4 rounded-xl">
 							<h2 className="text-lg font-bold mb-4">
-								Delivery / Pickup
+								Delivery Information
 							</h2>
 							<div className="mb-4">
 								<select
@@ -406,13 +406,13 @@ const CheckoutPage = () => {
 									onChange={handleServiceChange}
 									className="w-full p-2 text-sm border rounded-lg"
 								>
-									<option
+									{/* <option
 										value={
 											'self-pickup | ' + store?.address
 										}
 									>
 										Self Pickup - {store?.address}
-									</option>
+									</option> */}
 									<option value="delivery">Delivery</option>
 								</select>
 							</div>

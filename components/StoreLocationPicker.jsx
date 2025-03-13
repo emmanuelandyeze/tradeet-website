@@ -131,12 +131,13 @@ const StoreLocationPicker = ({store, setDeliveryFee, setLandmark}) => {
 			userLat,
 			userLon,
 		);
-		// Base charge of ₦400 for 0-3 km
+		// Base charge of ₦400 for 0-2 km
 		const charge =
-			250 +
-			Math.max(0, Math.ceil((distance - 2.5) / 2.5) * 250);
+			400 +
+			Math.max(0, Math.ceil((distance - 2) / 2) * 400);
 		return Math.min(charge, 1000000); // Cap at ₦1,000,000
 	};
+
 
 	// Example Usage
 	const storeLocation = {
@@ -185,6 +186,8 @@ const StoreLocationPicker = ({store, setDeliveryFee, setLandmark}) => {
 						<li
 							key={item.PlaceId}
 							onClick={() => handleSelectSuggestion(item)}
+							// style={{marginVertical: 3, cursor: 'pointer', borderBottomWidth: 1, borderColor: '#ccc'}}
+							className="my-3 cursor-pointer pb-2 border-b-[1px] border-b-[#ccc]"
 						>
 							{item.Place.Label}
 						</li>
