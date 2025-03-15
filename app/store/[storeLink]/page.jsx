@@ -24,7 +24,19 @@ const Page = async ({ params }) => {
 				</p>
 			</div>
 		)
-	} 
+	} else if (storeData.storeLink === "fastmeal") {
+		// Redirect to Fastmeal's official page for now
+        return (
+            <div className="flex flex-col items-center justify-center min-h-screen">
+                <h1 className="text-3xl font-semibold text-center text-red-500">
+                    Welcome to Fastmeal...
+                </h1>
+                <p className="text-gray-600 text-center mt-2">
+                    Apologies we are currently closed for the week. See you on Monday!
+                </p>
+            </div>
+        );
+	}
 
 	// Fetch store products
 	const storeProductsData = await getStoreProductsData(
