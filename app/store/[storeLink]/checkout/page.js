@@ -249,8 +249,8 @@ const CheckoutPage = () => {
 
 	const handleValidateDiscount = async () => {
 		try {
-			const response = await axios.post(
-				'https://tradeet-api.onrender.com/discounts/validate',
+			const response = await axiosClient.post(
+				'/discounts/validate',
 				{
 					businessId: store?._id,
 					code,
@@ -304,8 +304,8 @@ const CheckoutPage = () => {
 				discountAmount: discountAmount,
 			};
 
-			const response = await axios.post(
-				`https://tradeet-api.onrender.com/orders`,
+			const response = await axiosClient.post(
+				`/orders`,
 				// 'http://192.168.1.159:5000/orders',
 				orderData,
 			);

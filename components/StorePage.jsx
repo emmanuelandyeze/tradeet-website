@@ -12,6 +12,7 @@ import toast from 'react-hot-toast';
 import StoreFooter from '@/components/StoreFooter';
 import axios from 'axios';
 import { GiHotMeal } from "react-icons/gi";
+import axiosClient from '@/utils/axios';
 
 const StorePage = ({ storeData, storeProductsData }) => {
 	const { productsData } = storeProductsData;
@@ -147,8 +148,8 @@ const StorePage = ({ storeData, storeProductsData }) => {
 	useEffect(() => {
 		async function fetchCategory() {
 			try {
-				const response = await axios.get(
-					`https://tradeet-api.onrender.com/category/${storeData?._id}`,
+				const response = await axiosClient.get(
+					`/category/${storeData?._id}`,
 				);
 				setCategories(response.data);
 			} catch (err) {

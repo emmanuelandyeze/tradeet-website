@@ -50,8 +50,8 @@ const Page = () => {
 		const fetchOrder = async () => {
 			try {
 				setLoading(true);
-				const response = await axios.get(
-					`https://tradeet-api.onrender.com/orders/${orderId}`,
+				const response = await axiosClient.get(
+					`/orders/${orderId}`,
 				);
 				console.log(response.status);
 				if (response.status === 200) {

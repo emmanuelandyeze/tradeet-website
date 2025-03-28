@@ -48,8 +48,8 @@ const Page = () => {
 
 		const fetchOrder = async () => {
 			try {
-				const response = await axios.get(
-					`https://tradeet-api.onrender.com/orders/${orderId}`,
+				const response = await axiosClient.get(
+					`/orders/${orderId}`,
 				);
 				console.log(response);
 				if (response.status === 200) {
@@ -69,8 +69,8 @@ const Page = () => {
 
 	const handlePaymentConfirmation = async () => {
 		try {
-			const response = await axios.post(
-				`https://tradeet-api.onrender.com/orders/add-payment`,
+			const response = await axiosClient.post(
+				`/orders/add-payment`,
 				// 'http://192.168.1.159:5000/orders/add-payment',
 				{
 					storeId: store?._id,
@@ -110,23 +110,25 @@ const Page = () => {
 	);
 
 	const config = {
-		reference: new Date().getTime().toString(),
+		reference: order?.paystackReference,
 		email: email,
 		amount: amount * 100,
 		publicKey:
 			'pk_live_9ed31e08b1843a6818e392764c8dd6ac8457ea23',
+		// 'pk_test_b73dfa772179733254e4372f9bf2be4428f28d93',
 		metadata: {
 			products: formattedProducts,
+			orderId: orderId,
+			internalReference: order?.paystackReference,
 		},
 		channel: ['card', 'transfer', 'ussd'],
 	};
 
 	const handlePaystackSuccessAction = (reference) => {
-		// Implementation for whatever you want to do with reference and after success call.
-		console.log(reference);
-		if (reference.status === 'success') {
-			handlePaymentConfirmation();
-		}
+		// Just redirect to a status page, don't confirm payment here
+		router.push(
+			`/store/${storeLink}/orders/${orderId}/status?reference=${reference.reference}`,
+		);
 	};
 
 	// you can call this function anything
