@@ -272,11 +272,11 @@ const StorePage = ({ storeData, storeProductsData }) => {
 				/>
 
 				{storeData?.serviceType === 'services' ? (
-					<div className="text-center py-10">
-						<FaBagShopping className="mx-auto text-4xl text-gray-300 mb-4" />
+					<div className="text-center">
+						{/* <FaBagShopping className="mx-auto text-4xl text-gray-300 mb-4" />
 						<p className="text-gray-500">
 							Select a category to view offerings
-						</p>
+						</p> */}
 					</div>
 				) : (
 					<div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 md:gap-6">
@@ -345,7 +345,7 @@ const StorePage = ({ storeData, storeProductsData }) => {
 							{categories?.map((category) => (
 								<div
 									key={category._id}
-									className={`flex flex-col px-5 py-2 mx-4 bg-gray-200 rounded-lg h-30 w-[95%] md:h-60 justify-center items-center text-xs md:text-md cursor-pointer ${
+									className={`flex flex-col px-5 py-2 bg-gray-200 rounded-lg h-30 w-[100%] md:h-60 justify-center items-center text-xs md:text-md cursor-pointer ${
 										storeData?.serviceType !== 'services' &&
 										selectedCategory === category.name
 											? 'bg-green-600 text-white'
@@ -355,8 +355,8 @@ const StorePage = ({ storeData, storeProductsData }) => {
 										handleCategorySelect(category.name)
 									}
 								>
-									<GiHotMeal size={120} color="gray" />
-									<h3 className="text-xl mt-2 md:text-md text-center font-semibold">
+									<GiHotMeal className='text-[100px]' color="gray" />
+									<h3 className="text-lg md:text-xl mt-2 md:text-md text-center font-semibold">
 										{category.name}
 									</h3>
 								</div>

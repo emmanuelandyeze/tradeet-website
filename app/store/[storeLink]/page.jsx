@@ -57,14 +57,22 @@ const Page = async ({ params }) => {
 				storeData={storeData}
 				storeProductsData={storeProductsData}
 			/>
-			<div className='fixed bottom-5 md:bottom-20 right-4 bg-white p-4 rounded-md shadow-md'>
-				<p className="text-center text-gray-500 mb-5">
-					Hi, got any enquiries or questions?
-				</p>
-				<a target='_blank' href={`https://wa.me/${storeData?.phone}`} className='bg-green-900 text-white flex items-center justify-center gap-2 p-2 rounded-md mt-2 cursor-pointer'>
-					<BsWhatsapp color='white' />
-					Chat with us now
-				</a>
+			<div className="fixed bottom-28 md:bottom-20 right-7 md:right-10 z-50">
+				<div className="bg-white p-4 rounded-md shadow-md animate-collapse-to-icon">
+					<p className="text-center text-gray-500 mb-5 animate-fade-out">
+						Hi, got any enquiries or questions?
+					</p>
+					<a
+						target="_blank"
+						href={`https://wa.me/${storeData?.phone}`}
+						className="bg-green-900 text-white flex items-center justify-center gap-2 p-2 rounded-md mt-2 cursor-pointer animate-shrink-to-icon"
+					>
+						<BsWhatsapp color="white" size={24} />
+						<span className="animate-text-fade-out">
+							Chat with us now
+						</span>
+					</a>
+				</div>
 			</div>
 		</Suspense>
 	);

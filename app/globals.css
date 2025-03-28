@@ -28,3 +28,52 @@
   font-family: var(--font-inter);
 }
 
+@keyframes fadeOut {
+  0% { opacity: 1; }
+  90% { opacity: 1; }
+  100% { opacity: 0; display: none; }
+}
+
+@keyframes shrinkToIcon {
+  0% { padding: 0.5rem; width: auto; }
+  90% { padding: 0.5rem; width: auto; }
+  100% { padding: 0.5rem; width: 48px; justify-content: center; }
+}
+
+@keyframes textFadeOut {
+  0% { opacity: 1; width: auto; margin-left: 0.5rem; }
+  80% { opacity: 1; width: auto; margin-left: 0.5rem; }
+  100% { opacity: 0; width: 0; margin-left: 0; display: none; }
+}
+
+@keyframes collapseToIcon {
+  0% { padding: 1rem; width: auto; }
+  90% { padding: 1rem; width: auto; }
+  100% { padding: 0.5rem; width: 48px; }
+}
+
+.animate-fade-out {
+  animation: fadeOut 11s forwards;
+}
+
+.animate-shrink-to-icon {
+  animation: shrinkToIcon 11s forwards;
+}
+
+.animate-text-fade-out {
+  animation: textFadeOut 11s forwards;
+}
+
+.animate-collapse-to-icon {
+  animation: collapseToIcon 11s forwards;
+}
+
+/* Add this to ensure the icon stays clickable after animation */
+.animate-shrink-to-icon::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+}
