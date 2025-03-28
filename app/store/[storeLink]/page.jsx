@@ -57,7 +57,7 @@ const Page = async ({ params }) => {
 				storeData={storeData}
 				storeProductsData={storeProductsData}
 			/>
-			<div className='absolute bottom-5 md:-bottom-14 right-4 bg-white p-4 rounded-md shadow-md'>
+			<div className='fixed bottom-5 md:bottom-20 right-4 bg-white p-4 rounded-md shadow-md'>
 				<p className="text-center text-gray-500 mb-5">
 					Hi, got any enquiries or questions?
 				</p>

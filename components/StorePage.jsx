@@ -340,27 +340,29 @@ const StorePage = ({ storeData, storeProductsData }) => {
 						</div>
 					)}
 
-					<div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-						{categories?.map((category) => (
-							<div
-								key={category._id}
-								className={`flex flex-col px-10 py-2 bg-gray-200 rounded-lg h-60 justify-center items-center text-xs md:text-md cursor-pointer min-w-max ${
-									storeData?.serviceType !== 'services' &&
-									selectedCategory === category.name
-										? 'bg-green-600 text-white'
-										: 'hover:bg-gray-300'
-								}`}
-								onClick={() =>
-									handleCategorySelect(category.name)
-								}
-							>
-								<GiHotMeal size={120} color="gray" />
-								<h3 className="text-xl mt-2 md:text-md text-center font-semibold">
-									{category.name}
-								</h3>
-							</div>
-						))}
-					</div>
+					{storeData?.serviceType === 'services' && (
+						<div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+							{categories?.map((category) => (
+								<div
+									key={category._id}
+									className={`flex flex-col px-5 py-2 mx-4 bg-gray-200 rounded-lg h-30 w-[95%] md:h-60 justify-center items-center text-xs md:text-md cursor-pointer ${
+										storeData?.serviceType !== 'services' &&
+										selectedCategory === category.name
+											? 'bg-green-600 text-white'
+											: 'hover:bg-gray-300'
+									}`}
+									onClick={() =>
+										handleCategorySelect(category.name)
+									}
+								>
+									<GiHotMeal size={120} color="gray" />
+									<h3 className="text-xl mt-2 md:text-md text-center font-semibold">
+										{category.name}
+									</h3>
+								</div>
+							))}
+						</div>
+					)}
 				</div>
 			</div>
 
