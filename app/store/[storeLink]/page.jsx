@@ -4,6 +4,7 @@ import {
 	getStoreProductsData,
 } from '@/app/lib/api';
 import { Suspense } from 'react';
+import { BsWhatsapp } from 'react-icons/bs';
 
 const Page = async ({ params }) => {
 	const { storeLink } = params;
@@ -56,6 +57,15 @@ const Page = async ({ params }) => {
 				storeData={storeData}
 				storeProductsData={storeProductsData}
 			/>
+			<div className='absolute bottom-5 md:-bottom-14 right-4 bg-white p-4 rounded-md shadow-md'>
+				<p className="text-center text-gray-500 mb-5">
+					Hi, got any enquiries or questions?
+				</p>
+				<a target='_blank' href={`https://wa.me/${storeData?.phone}`} className='bg-green-900 text-white flex items-center justify-center gap-2 p-2 rounded-md mt-2 cursor-pointer'>
+					<BsWhatsapp color='white' />
+					Chat with us now
+				</a>
+			</div>
 		</Suspense>
 	);
 };

@@ -3,6 +3,7 @@ import {
 	Poppins,
 	Lora,
 	Open_Sans,
+	Hanken_Grotesk,
 } from 'next/font/google';
 import './globals.css';
 import Navbar from '@/components/Navbar';
@@ -42,7 +43,7 @@ const poppins = Poppins({
 	],
 });
 
-const openSans = Open_Sans({
+const openSans = Hanken_Grotesk({
 	subsets: ['latin'],
 	variable: '--font-opensans',
 	weight: ['300', '400', '500', '600', '700', '800'],
@@ -88,6 +89,10 @@ export default function RootLayout({ children }) {
 				<meta name="keywords" content={metadata.keywords} />
 				<meta name="author" content={metadata.author} />
 				<meta name="viewport" content={metadata.viewport} />
+				<meta
+					name="google-site-verification"
+					content="Kji9l_4xcUHOx25OiDtq1j71yzA_sbBla-9dpSAnL7I"
+				/>
 			</head>
 			<body
 				className={` ${openSans.className} antialiased`}
