@@ -10,12 +10,15 @@ import {
 	FaBagShopping,
 	FaChevronDown,
 	FaChevronUp,
-} from 'react-icons/fa6';
+	FaSearch,
+} from 'react-icons/fa';
 import toast from 'react-hot-toast';
 import StoreFooter from '@/components/StoreFooter';
 import { GiHotMeal } from 'react-icons/gi';
 import axiosClient from '@/utils/axios';
 import ProductCard from '@/components/ProductCard';
+import { FaAngleRight } from 'react-icons/fa';
+import SearchModal from '@/components/SearchModal';
 
 const StoreCategory = ({
 	storeData,
@@ -24,6 +27,7 @@ const StoreCategory = ({
 }) => {
 	const productsData = storeProductsData;
 	const [error, setError] = useState(null);
+	const [allProducts, setAllProducts] = useState([]);
 	const [filteredProducts, setFilteredProducts] = useState(
 		[],
 	);
@@ -32,13 +36,53 @@ const StoreCategory = ({
 		useState(null);
 	const [isMobileMenuOpen, setIsMobileMenuOpen] =
 		useState(false);
+	const [isSearchModalOpen, setIsSearchModalOpen] =
+		useState(false);
+	const [searchQuery, setSearchQuery] = useState('');
+	const [isLoading, setIsLoading] = useState(true);
 	const router = useRouter();
 	const [cart, setCart] = useState([]);
 	const [isCartOpen, setIsCartOpen] = useState(false);
 
-	const handleSearch = useCallback((results) => {
-		setFilteredProducts(results);
-	}, []);
+	useEffect(() => {
+		setIsLoading(true);
+		setAllProducts(productsData || []);
+		setFilteredProducts(productsData || []);
+		setIsLoading(false);
+	}, [productsData]);
+
+	const handleSearch = useCallback(
+		(query) => {
+			setSearchQuery(query);
+			if (!query) {
+				// If search is empty, show all products in current category
+				if (selectedCategory?.slug === 'all') {
+					setFilteredProducts(allProducts);
+				} else {
+					setFilteredProducts(
+						allProducts.filter(
+							(product) =>
+								product.category?.slug ===
+								selectedCategory?.slug,
+						),
+					);
+				}
+				return;
+			}
+
+			const results = allProducts.filter(
+				(product) =>
+					product.name
+						.toLowerCase()
+						.includes(query.toLowerCase()) ||
+					product.description
+						?.toLowerCase()
+						.includes(query.toLowerCase()),
+			);
+			setFilteredProducts(results);
+		},
+		[allProducts, selectedCategory],
+	);
 
 	useEffect(() => {
 		async function fetchCategories() {
@@ -70,21 +114,22 @@ const StoreCategory = ({
 	}, [storeData?._id, slug]);
 
 	useEffect(() => {
-		if (selectedCategory) {
+		if (selectedCategory && allProducts.length > 0) {
+			setIsLoading(true);
 			if (selectedCategory.slug === 'all') {
-				setFilteredProducts(productsData);
+				setFilteredProducts(allProducts);
 			} else {
 				setFilteredProducts(
-					productsData?.filter(
+					allProducts.filter(
 						(product) =>
-							product.category &&
-							product.category.slug ===
-								selectedCategory.slug,
+							product.category?.slug ===
+							selectedCategory.slug,
 					),
 				);
 			}
+			setIsLoading(false);
 		}
-	}, [selectedCategory, productsData]);
+	}, [selectedCategory, allProducts]);
 
 	const handleCategorySelect = (category) => {
 		setSelectedCategory(category);
@@ -136,76 +181,89 @@ const StoreCategory = ({
 				setIsCartOpen={setIsCartOpen}
 			/>
 
-			<div className="container mx-auto px-4 py-8">
-				{/* Mobile Category Dropdown */}
-				<div className="lg:hidden pt-16 mb-6">
-					<button
-						onClick={() =>
-							setIsMobileMenuOpen(!isMobileMenuOpen)
-						}
-						className="w-full flex justify-between items-center p-4 bg-white rounded-lg shadow-sm border border-gray-200"
-						style={{ color: storeData?.themeColor }}
-					>
-						<span className="font-medium">
-							{selectedCategory.name}
-						</span>
-						{isMobileMenuOpen ? (
-							<FaChevronUp />
-						) : (
-							<FaChevronDown />
-						)}
-					</button>
+			<SearchModal
+				isOpen={isSearchModalOpen}
+				onClose={() => setIsSearchModalOpen(false)}
+			>
+				<div className="p-4 w-full">
+					<div className="relative">
+						<input
+							type="text"
+							placeholder="Search products..."
+							className="w-full p-3 pl-10 border border-gray-300 rounded-lg focus:outline-none focus:ring-2"
+							style={{
+								focusRingColor: storeData?.themeColor,
+							}}
+							value={searchQuery}
+							onChange={(e) => handleSearch(e.target.value)}
+						/>
+						<FaSearch className="absolute left-3 top-3.5 text-gray-400" />
+					</div>
+				</div>
+			</SearchModal>
 
-					{isMobileMenuOpen && (
-						<div className="mt-2 bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+			<div className="container mx-auto px-4 py-8">
+				<div className="mx-auto pb-0">
+					{/* Mobile Category and Search */}
+					<div className="lg:hidden pt-10 mb-6 flex gap-2">
+						<div className="flex-1">
 							<button
 								onClick={() =>
-									handleCategorySelect({
-										name: 'All',
-										slug: 'all',
-									})
+									setIsMobileMenuOpen(!isMobileMenuOpen)
 								}
-								className={`w-full text-left px-4 py-3 ${
-									selectedCategory.slug === 'all'
-										? 'bg-gray-100 font-medium'
-										: 'hover:bg-gray-50'
-								}`}
-								style={{
-									color:
-										selectedCategory.slug === 'all'
-											? storeData?.themeColor
-											: 'inherit',
-								}}
+								className="w-full flex justify-between items-center p-4 bg-white rounded-lg shadow-sm border border-gray-200"
+								style={{ color: storeData?.themeColor }}
 							>
-								All Categories
+								<span className="font-medium">
+									{selectedCategory.name}
+								</span>
+								{isMobileMenuOpen ? (
+									<FaChevronUp />
+								) : (
+									<FaChevronDown />
+								)}
 							</button>
-							{categories.map((category) => (
-								<button
-									key={category._id}
-									onClick={() =>
-										handleCategorySelect(category)
-									}
-									className={`w-full text-left px-4 py-3 ${
-										selectedCategory.slug === category.slug
-											? 'bg-gray-100 font-medium'
-											: 'hover:bg-gray-50'
-									}`}
-									style={{
-										color:
-											selectedCategory.slug ===
-											category.slug
-												? storeData?.themeColor
-												: 'inherit',
-									}}
-								>
-									{category.name}
-								</button>
-							))}
+
+							{isMobileMenuOpen && (
+								<div className="mt-2 bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+									
+									{categories.map((category) => (
+										<button
+											key={category._id}
+											onClick={() =>
+												handleCategorySelect(category)
+											}
+											className={`w-full text-left px-4 py-3 ${
+												selectedCategory.slug ===
+												category.slug
+													? 'bg-gray-100 font-medium'
+													: 'hover:bg-gray-50'
+											}`}
+											style={{
+												color:
+													selectedCategory.slug ===
+													category.slug
+														? storeData?.themeColor
+														: 'inherit',
+											}}
+										>
+											{category.name}
+										</button>
+									))}
+								</div>
+							)}
 						</div>
-					)}
+						<button
+							onClick={() => setIsSearchModalOpen(true)}
+							className="p-4 bg-white rounded-lg shadow-sm border border-gray-200 flex items-center justify-center"
+							style={{ color: storeData?.themeColor }}
+						>
+							<FaSearch className="text-lg" />
+						</button>
+					</div>
 				</div>
 
-				<div className="flex md:pt-20 md:pb-20 flex-col lg:flex-row gap-8">
+				<div className="flex md:pt-10 md:pb-20 flex-col lg:flex-row gap-8">
 					{/* Desktop Category Sidebar */}
 					<div className="hidden lg:block w-full lg:w-64 flex-shrink-0">
 						<div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 sticky top-4">
@@ -216,7 +274,6 @@ const StoreCategory = ({
 								Categories
 							</h3>
 							<div className="space-y-2">
-							
 								{categories.map((category) => (
 									<button
 										key={category._id}
@@ -246,45 +303,69 @@ const StoreCategory = ({
 
 					{/* Products Section */}
 					<div className="flex-1">
-						<div className="mb-6">
+						<div className="mb-6 hidden md:block">
 							<SearchBar
 								onSearch={handleSearch}
 								placeholder="Search products..."
 							/>
 						</div>
 
-						<h2
-							className="text-2xl font-bold mb-6"
-							style={{ color: storeData?.themeColor }}
-						>
-							{selectedCategory.name === 'All'
-								? 'All Products'
-								: selectedCategory.name}
-						</h2>
-
-						<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-							{filteredProducts?.length > 0 ? (
-								filteredProducts?.map((product) => (
-									<ProductCard
-										key={product._id}
-										product={product}
-										themeColor={storeData?.themeColor}
-									/>
-								))
-							) : (
-								<div className="col-span-full text-center py-12">
-									<GiHotMeal className="mx-auto text-gray-400 text-5xl mb-4" />
-									<h3 className="text-lg font-medium text-gray-700">
-										No products found
-									</h3>
-									<p className="text-gray-500 mt-1">
-										{selectedCategory.name === 'All'
-											? "This store doesn't have any products yet."
-											: `No products in the ${selectedCategory.name} category.`}
-									</p>
-								</div>
-							)}
+						<div className="flex flex-row items-center gap-2 mb-6">
+							<h2 className="text-lg md:text-2xl font-bold">
+								{storeData?.name}
+							</h2>
+							<FaAngleRight />
+							<h2
+								className="text-lg md:text-2xl font-bold underline underline-offset-1"
+								style={{ color: storeData?.themeColor }}
+							>
+								{selectedCategory.name === 'All'
+									? 'All Products'
+									: selectedCategory.name}
+							</h2>
 						</div>
+
+						{isLoading ? (
+							<div className="flex justify-center items-center py-12">
+								<RotatingSquare
+									height="50"
+									width="50"
+									color={storeData?.themeColor || '#4fa94d'}
+									ariaLabel="rotating-square-loading"
+									strokeWidth="4"
+									visible={true}
+								/>
+							</div>
+						) : (
+							<>
+								<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-6">
+									{filteredProducts?.length > 0 ? (
+										filteredProducts?.map((product) => (
+											<ProductCard
+												key={product._id}
+												product={product}
+												themeColor={storeData?.themeColor}
+                                                storeData={storeData}
+											/>
+										))
+									) : (
+										<div className="col-span-full text-center py-12">
+											<GiHotMeal className="mx-auto text-gray-400 text-5xl mb-4" />
+											<h3 className="text-lg font-medium text-gray-700">
+												No products found
+											</h3>
+											<p className="text-gray-500 mt-1">
+												{selectedCategory.name === 'All'
+													? "This store doesn't have any products yet."
+													: `No products in the ${selectedCategory.name} category.`}
+												{searchQuery &&
+													' Try a different search term.'}
+											</p>
+										</div>
+									)}
+								</div>
+							</>
+						)}
 					</div>
 				</div>
 			</div>

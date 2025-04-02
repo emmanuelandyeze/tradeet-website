@@ -353,7 +353,7 @@ const StorePage = ({ storeData, storeProductsData }) => {
 											: 'hover:bg-gray-300'
 									}`}
 									onClick={() =>
-										handleCategorySelect(category.name)
+										router.push(`/store/${storeData.storeLink}/categories/${category.slug}`)
 									}
 								>
 									<GiHotMeal className='text-[100px]' color="gray" />

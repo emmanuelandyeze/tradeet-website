@@ -123,7 +123,7 @@ const ProductPage = ({ productData, storeData }) => {
 			{/* Back Button */}
 			<div
 				onClick={() =>
-					router.push(`/store/${storeData?.storeLink}`)
+					router.back()
 				}
 				className="pt-20 px-4 flex items-center gap-3 cursor-pointer w-full max-w-4xl mx-auto"
 			>
