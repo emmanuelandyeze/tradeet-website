@@ -77,3 +77,24 @@ export const getStoreProduct = async (id) => {
 		return null;
 	}
 };
+
+export const getStoreCategoryProduct = async (id, slug) => {
+	try {
+		const response = await axios.get(
+			`${url}/products/store/${id}/categories/${slug}/products`,
+		);
+
+		if (response.status !== 200) {
+			console.error(
+				`Error: Received status code ${response.status}`,
+			);
+			return null;
+		}
+
+		const productData = response.data;
+		return productData;
+	} catch (error) {
+		console.error('Error fetching product data:', error);
+		return null;
+	}
+};
