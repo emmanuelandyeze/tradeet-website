@@ -11,7 +11,7 @@ import Modal from '@/components/Modal';
 import toast from 'react-hot-toast';
 import StoreFooter from '@/components/StoreFooter';
 import axios from 'axios';
-import { GiHotMeal } from "react-icons/gi";
+import { FiShoppingBag } from 'react-icons/fi';
 import axiosClient from '@/utils/axios';
 
 const StorePage = ({ storeData, storeProductsData }) => {
@@ -266,11 +266,11 @@ const StorePage = ({ storeData, storeProductsData }) => {
 					</div>
 				)}
 
-				<SearchBar
+				{/* <SearchBar
 					items={productsData}
 					onSearch={handleSearch}
 					storeData={storeData}
-				/>
+				/> */}
 
 				{storeData?.serviceType === 'services' ? (
 					<div className="text-center">
@@ -353,10 +353,24 @@ const StorePage = ({ storeData, storeProductsData }) => {
 											: 'hover:bg-gray-300'
 									}`}
 									onClick={() =>
-										router.push(`/store/${storeData.storeLink}/categories/${category.slug}`)
+										router.push(
+											`/store/${storeData.storeLink}/categories/${category.slug}`,
+										)
 									}
 								>
-									<GiHotMeal className='text-[100px]' color="gray" />
+									{category.image ? (
+										<img
+											src={category.image}
+											alt={category.name}
+											className="w-40 h-40 rounded-full object-cover"
+										/>
+									) : (
+										<FiShoppingBag
+											className="text-[100px]"
+											color="gray"
+										/>
+									)}
+
 									<h3 className="text-lg md:text-xl mt-2 md:text-md text-center font-semibold">
 										{category.name}
 									</h3>

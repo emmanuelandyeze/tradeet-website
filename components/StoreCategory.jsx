@@ -226,7 +226,6 @@ const StoreCategory = ({
 
 							{isMobileMenuOpen && (
 								<div className="mt-2 bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
-									
 									{categories.map((category) => (
 										<button
 											key={category._id}
@@ -302,11 +301,16 @@ const StoreCategory = ({
 					</div>
 
 					{/* Products Section */}
-					<div className="flex-1">
+					<div className="flex-1 pb-20">
 						<div className="mb-6 hidden md:block">
-							<SearchBar
-								onSearch={handleSearch}
-								placeholder="Search products..."
+							<input
+								type="text"
+								value={searchQuery}
+								onChange={(e) =>
+									handleSearch(e.target.value)
+								}
+								className="border py-4 px-3 rounded-lg focus:border-[1px] focus:border-gray-100 w-full md:w-2/3"
+								placeholder="Search for products..."
 							/>
 						</div>
 
@@ -345,7 +349,7 @@ const StoreCategory = ({
 												key={product._id}
 												product={product}
 												themeColor={storeData?.themeColor}
-                                                storeData={storeData}
+												storeData={storeData}
 											/>
 										))
 									) : (
