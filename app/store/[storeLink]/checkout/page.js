@@ -13,11 +13,14 @@ import { getStoreData } from '@/app/lib/api';
 import StoreLocationPicker from '@/components/StoreLocationPicker';
 import NormalStoreNavbar from '@/components/NormalStoreNav';
 import { toast } from 'react-toastify';
+import Modal from '@/components/Modal';
 
 const countryCodes = [{ code: '+234', country: 'Nigeria' }];
 
 const CheckoutPage = () => {
 	const searchParams = useSearchParams();
+	const { storeLink } = useParams();
+	const router = useRouter();
 	const advId = searchParams.get('ad');
 	const [cart, setCart] = useState([]);
 	const [userDetails, setUserDetails] = useState({
@@ -27,7 +30,6 @@ const CheckoutPage = () => {
 	const [serviceType, setServiceType] =
 		useState('delivery');
 	const [address, setAddress] = useState('');
-	const [modalIsOpen, setModalIsOpen] = useState(false);
 	const [discountCode, setDiscountCode] = useState('');
 	const [discountApplied, setDiscountApplied] =
 		useState(false);
@@ -38,25 +40,100 @@ const CheckoutPage = () => {
 	const [deliveryServices, setDeliveryServices] = useState(
 		[],
 	);
-	const [selectedState, setSelectedState] = useState('');
-	const [availableServices, setAvailableServices] =
-		useState([]);
-	const [selectedLocation, setSelectedLocation] =
-		useState('');
 	const [landmark, setLandmark] = useState('');
-	const [availableLocations, setAvailableLocations] =
-		useState([]);
 	const [loading, setLoading] = useState(false);
 	const [adLoading, setAdLoading] = useState(false);
-	const [serviceName, setServiceName] = useState('');
-
 	const [discountAmount, setDiscountAmount] = useState(0);
 	const [code, setCode] = useState('');
 	const [discountInfo, setDiscountInfo] = useState(null);
 	const [error, setError] = useState('');
 
-	const { storeLink } = useParams();
-	const router = useRouter();
+	const [isOpen, setIsOpen] = useState(true); // Track if store is open
+	const [nextOpeningTime, setNextOpeningTime] =
+		useState(null); // Next available time
+	const [showScheduleModal, setShowScheduleModal] =
+		useState(false); // Modal state
+	const [scheduledTime, setScheduledTime] = useState(null); // Selected scheduled time
+
+	const checkBusinessOpenStatus = async () => {
+		try {
+			const response = await axiosClient.get(
+				`/businesses/store/${storeLink}`,
+			);
+			const { openingHours } = response.data.business;
+
+			const now = new Date();
+			const currentDay = new Intl.DateTimeFormat('en-US', {
+				weekday: 'long',
+			}).format(now);
+			const currentMinutes =
+				now.getHours() * 60 + now.getMinutes();
+
+			const todayHours = openingHours[currentDay];
+
+			let isOpenNow = false;
+			let nextOpeningTime = null;
+
+			// Check if store is open today
+			if (todayHours && todayHours.open !== null) {
+				const openingTimeMinutes = todayHours.open * 60;
+				const closingTimeMinutes = todayHours.close * 60;
+
+				// Check if the current time is within opening hours
+				isOpenNow =
+					currentMinutes >= openingTimeMinutes &&
+					currentMinutes < closingTimeMinutes;
+			}
+
+			// If store is closed, find next opening day
+			if (!isOpenNow) {
+				const days = [
+					'Sunday',
+					'Monday',
+					'Tuesday',
+					'Wednesday',
+					'Thursday',
+					'Friday',
+					'Saturday',
+				];
+
+				let index = days.indexOf(currentDay);
+
+				// Loop through the next 7 days to find when the store opens next
+				for (let i = 0; i < 7; i++) {
+					index = (index + 1) % 7; // Move to the next day
+					const day = days[index];
+
+					if (
+						openingHours[day] &&
+						openingHours[day].open !== null
+					) {
+						nextOpeningTime = {
+							day,
+							time: openingHours[day].open, // Opening hour in 24-hour format
+						};
+						break;
+					}
+				}
+			}
+
+			// Update state accordingly
+			setIsOpen(isOpenNow);
+			setNextOpeningTime(nextOpeningTime);
+
+			console.log('isOpenNow:', isOpenNow);
+			console.log('Next Opening Time:', nextOpeningTime);
+		} catch (error) {
+			console.error(
+				'Error fetching business hours:',
+				error,
+			);
+		}
+	};
+
+	useEffect(() => {
+		checkBusinessOpenStatus();
+	}, []);
 
 	// Fetch Store and Delivery Services Data
 	useEffect(() => {
@@ -269,19 +346,31 @@ const CheckoutPage = () => {
 		}
 	};
 
+	console.log(scheduledTime);
+
 	// Place Order
 	const handlePlaceOrder = async () => {
 		if (!validateFields()) return;
 
+		if (!isOpen && !scheduledTime) {
+			// console.log('hello');
+			// Show modal if store is closed and no scheduled time is selected
+			setShowScheduleModal(true);
+			return;
+		}
+
 		try {
 			setLoading(true);
+
 			const orderData = {
 				storeId: store?._id,
 				customerInfo: {
 					name: userDetails.name,
 					contact:
 						selectedCountryCode + userDetails.whatsapp,
-					address: address && address + ', ' + landmark,
+					address: address
+						? address + ', ' + landmark
+						: null,
 					expoPushToken: userDetails?.expoPushToken,
 					pickUp: address ? false : true,
 				},
@@ -289,7 +378,7 @@ const CheckoutPage = () => {
 				payment: {
 					type: 'bank',
 					status: 'pending',
-					timestamp: new Date(), // Payment timestamp
+					timestamp: new Date(),
 				},
 				userId: userDetails?._id,
 				totalAmount: finalTotal,
@@ -302,34 +391,32 @@ const CheckoutPage = () => {
 					serviceType === 'delivery' ? deliveryFee : 0,
 				serviceFee: serviceFee,
 				discountAmount: discountAmount,
+				scheduledTime: scheduledTime
+					? new Date(scheduledTime)
+					: null, // Include if scheduled
 			};
 
 			const response = await axiosClient.post(
 				`/orders`,
-				// 'http://192.168.1.159:5000/orders',
 				orderData,
 			);
 
-			// console.log(response.data);
 			if (
 				response.data.message ===
 				'Order placed successfully'
 			) {
 				toast.success('Order placed successfully');
 				localStorage.removeItem('cart');
-				// console.log(response.data.orderId);
 				router.push(
 					`/store/${storeLink}/pay?orderId=${response.data.order._id}`,
 				);
-				setLoading(false);
 			} else {
 				toast.error('Error placing order');
-
-				setLoading(false);
 			}
 		} catch (error) {
 			toast.error('Error placing order');
 			console.error(error);
+		} finally {
 			setLoading(false);
 		}
 	};
@@ -605,6 +692,48 @@ const CheckoutPage = () => {
 						</button>
 					</div>
 				</form>
+				{showScheduleModal && nextOpeningTime && (
+					<Modal
+						onClose={() => setShowScheduleModal(false)}
+					>
+						<h2 className="text-xl text-center">
+							Store is Currently Closed
+						</h2>
+						<p className="text-md text-center">
+							The store is closed right now. You can
+							schedule your order for:
+						</p>
+						<p className="text-lg my-3 font-bold text-center">
+							{nextOpeningTime.day} at{' '}
+							{/* {Math.floor(nextOpeningTime.time / 60)}: */}
+							{(nextOpeningTime.time % 60)
+								.toString()
+								.padStart(2, '0')}
+							:00{' '}
+						</p>
+						<br />
+
+						<div className="flex flex-row items-center justify-end gap-5">
+							<button
+								onClick={() => setShowScheduleModal(false)}
+							>
+								Cancel
+							</button>
+							<button
+								className="px-6 py-2 rounded-md bg-green-500 text-white"
+								onClick={() => {
+									setScheduledTime(
+										`${nextOpeningTime.day} ${nextOpeningTime.time}:00`,
+									);
+									setShowScheduleModal(false);
+									handlePlaceOrder(); // Retry placing the order with the scheduled time
+								}}
+							>
+								Schedule Order
+							</button>
+						</div>
+					</Modal>
+				)}
 			</div>
 		</div>
 	);

@@ -1,6 +1,7 @@
 // lib/api.js
 import axios from 'axios';
 const url = 'https://tradeet-api.onrender.com'; 
+// const url = 'http://192.168.83.140:5000';
 
 export const getStoreData = async (storeLink) => {
 	try {
