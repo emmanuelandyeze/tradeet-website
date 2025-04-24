@@ -233,12 +233,9 @@ const CheckoutPage = () => {
 			return false;
 		}
 
-		if (
-			serviceType === 'delivery' &&
-			(!address || !landmark)
-		) {
+		if (serviceType === 'delivery' && !address) {
 			const notify = toast(
-				'Please fill in the delivery address and select a nearest landmark.',
+				'Please fill in the delivery address.',
 			);
 			notify();
 			return false;
@@ -368,9 +365,7 @@ const CheckoutPage = () => {
 					name: userDetails.name,
 					contact:
 						selectedCountryCode + userDetails.whatsapp,
-					address: address
-						? address + ', ' + landmark
-						: null,
+					address: address ? address : null,
 					expoPushToken: userDetails?.expoPushToken,
 					pickUp: address ? false : true,
 				},
@@ -507,7 +502,7 @@ const CheckoutPage = () => {
 							{serviceType === 'delivery' && (
 								<>
 									{/* Address Input */}
-									<div className="mb-4">
+									{/* <div className="mb-4">
 										<label className="block mb-1 text-sm">
 											Address*
 										</label>
@@ -517,11 +512,11 @@ const CheckoutPage = () => {
 											className="w-full p-2 text-sm border rounded-lg"
 											required
 										/>
-									</div>
+									</div> */}
 									<StoreLocationPicker
 										store={store}
 										setDeliveryFee={setDeliveryFee}
-										setLandmark={setLandmark}
+										setLandmark={setAddress}
 									/>
 								</>
 							)}
