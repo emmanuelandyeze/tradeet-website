@@ -12,8 +12,7 @@ const StoreLocationPicker = ({
 		useState(null);
 	const [address, setAddress] = useState('');
 
-	const GOOGLE_API_KEY =
-		'AIzaSyDB9u0LKWhMKSBImf97RJjD8KzNq8rfPMY'; // Replace with your actual key
+	const GOOGLE_API_KEY = process.env.GOOGLE_API_KEY; // Replace with your actual key
 
 	useEffect(() => {
 		if ('geolocation' in navigator) {
