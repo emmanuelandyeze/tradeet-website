@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import axiosClient from '@/utils/axios';
 
 const StoreLocationPicker = ({
 	store,
@@ -31,8 +32,14 @@ const StoreLocationPicker = ({
 
 	const reverseGeocode = async (lat, lng) => {
 		try {
-			const res = await axios.get(
-				`https://maps.googleapis.com/maps/api/geocode/json?latlng=${lat},${lng}&key=${GOOGLE_API_KEY}`,
+			const res = await axiosClient.get(
+				`/google/reverse-geocode`,
+				{
+					params: {
+						lat: lat,
+						lng: lng,
+					},
+				}
 			);
 			if (res.data.results.length > 0) {
 				setAddress(res.data.results[0].formatted_address);
@@ -47,14 +54,11 @@ const StoreLocationPicker = ({
 		console.log(query)
 		if (query.length > 2) {
 			try {
-				const res = await axios.get(
-					`https://maps.googleapis.com/maps/api/place/autocomplete/json`,
+				const res = await axiosClient.get(
+					`/google/autocomplete`,
 					{
 						params: {
-							input: query,
-							key: GOOGLE_API_KEY,
-							types: 'geocode',
-							language: 'en',
+							input: query
 						},
 					},
 				);
@@ -68,9 +72,11 @@ const StoreLocationPicker = ({
 	};
 
 	const getPlaceDetails = async (placeId) => {
-		const res = await axios.get(
-			`https://maps.googleapis.com/maps/api/place/details/json?place_id=${placeId}&key=${GOOGLE_API_KEY}`,
-		);
+		const res = await axiosClient.get(`/google/place-details`, {
+			params: {
+				place_id: placeId,
+			},
+		});
 		return res.data.result.geometry.location;
 	};
 

@@ -488,13 +488,13 @@ const CheckoutPage = () => {
 									onChange={handleServiceChange}
 									className="w-full p-2 text-sm border rounded-lg"
 								>
-									{/* <option
+									<option
 										value={
 											'self-pickup | ' + store?.address
 										}
 									>
 										Self Pickup - {store?.address}
-									</option> */}
+									</option>
 									<option value="delivery">Delivery</option>
 								</select>
 							</div>
