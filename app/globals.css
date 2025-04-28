@@ -17,7 +17,7 @@
 
 /* Tailwind custom CSS classes */
 .poppins-font {
-  font-family: var(--font-poppins);
+  font-family: var(--font-poppins); 
 }
 
 .lora-font {

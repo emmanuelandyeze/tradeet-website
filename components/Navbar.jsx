@@ -34,11 +34,11 @@ export default function Navbar() {
 					<div
 						className={`flex-shrink-0 text-xl font-bold  ${
 							isHomePage && !isScrolled
-								? 'text-white'
+								? 'text-[#212121]'
 								: 'text-[#212121]'
 						}`}
 					>
-						<span className="text-[#00C853]">Tradeet </span>
+						<span className="text-[#05b204]">Tradeet </span>
 						Business
 					</div>
 
@@ -47,7 +47,7 @@ export default function Navbar() {
 							href="/"
 							className={`text-gray-800 hover:text-blue-600 ${
 								isHomePage && !isScrolled
-									? 'text-white'
+									? 'text-[#212121]'
 									: 'text-[#212121]'
 							}`}
 						>
@@ -57,7 +57,7 @@ export default function Navbar() {
 							href="/about"
 							className={`text-gray-800 hover:text-blue-600 ${
 								isHomePage && !isScrolled
-									? 'text-white'
+									? 'text-[#212121]'
 									: 'text-[#212121]'
 							}`}
 						>
@@ -67,7 +67,7 @@ export default function Navbar() {
 							href="/services"
 							className={`text-gray-800 hover:text-blue-600 ${
 								isHomePage && !isScrolled
-									? 'text-white'
+									? 'text-[#212121]'
 									: 'text-[#212121]'
 							}`}
 						>
@@ -77,7 +77,7 @@ export default function Navbar() {
 							href="/contact"
 							className={`text-gray-800 hover:text-blue-600 ${
 								isHomePage && !isScrolled
-									? 'text-white'
+									? 'text-[#212121]'
 									: 'text-[#212121]'
 							}`}
 						>
@@ -94,7 +94,7 @@ export default function Navbar() {
 								<X
 									className={`${
 										isHomePage && !isScrolled
-											? 'text-white'
+											? 'text-[#212121]'
 											: 'text-[#212121]'
 									}`}
 									size={24}
@@ -103,7 +103,7 @@ export default function Navbar() {
 								<Menu
 									className={`${
 										isHomePage && !isScrolled
-											? 'text-white'
+											? 'text-[#212121]'
 											: 'text-[#212121]'
 									}`}
 									size={24}

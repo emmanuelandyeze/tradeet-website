@@ -59,23 +59,53 @@ export const metadata = {
 	title:
 		'Tradeet Business – Manage Inventory, Finances & Marketing',
 	description:
-		'Tradeet is an all-in-one business management app for freelancers and small business owners. Track inventory, automate invoicing, build your online presence, and market your brand with ease.',
-	keywords:
-		'business management app, inventory tracking for small businesses, best finance tools for freelancers, marketing automation for e-commerce, all-in-one business solution, online store builder, invoice and expense tracking app, small business growth tools, WhatsApp marketing software',
+		'Tradeet is the ultimate all-in-one app for freelancers and small business owners. Manage inventory, track finances, automate invoicing, and boost your brand with powerful marketing tools.',
+	keywords: [
+		'business management app',
+		'inventory tracking for small businesses',
+		'finance tools for freelancers',
+		'marketing automation for e-commerce',
+		'all-in-one business solution',
+		'online store builder',
+		'invoice tracking app',
+		'expense tracking app',
+		'small business growth tools',
+		'WhatsApp marketing software',
+		'Tradeet app',
+		'business management Nigeria',
+	],
 	author: 'Tradeet Business',
-	image: 'https://tradeet.ng/images/logo.png',
+	creator: 'Tradeet Business',
+	robots: 'index, follow',
+	image: 'https://www.tradeet.ng/images/logo.png',
 	openGraph: {
 		title:
 			'Tradeet Business – Manage Inventory, Finances & Marketing',
 		description:
-			'Tradeet is an all-in-one business management app for freelancers and small business owners. Track inventory, automate invoicing, build your online presence, and market your brand with ease.',
-		keywords:
-			'business management app, inventory tracking for small businesses, best finance tools for freelancers, marketing automation for e-commerce, all-in-one business solution, online store builder, invoice and expense tracking app, small business growth tools, WhatsApp marketing software',
-		image: 'https://www.tradeet.ng/images/logo.png',
+			'Tradeet empowers entrepreneurs to manage inventory, automate finances, and grow their brand — all in one easy-to-use app.',
 		url: 'https://www.tradeet.ng',
 		type: 'website',
+		images: [
+			{
+				url: 'https://www.tradeet.ng/images/logo.png',
+				width: 1200,
+				height: 630,
+				alt: 'Tradeet Business App',
+			},
+		],
+		siteName: 'Tradeet Business',
+	},
+	twitter: {
+		card: 'summary_large_image',
+		title:
+			'Tradeet Business – Manage Inventory, Finances & Marketing',
+		description:
+			'The smartest business management app for small businesses and freelancers. Manage, market, and grow with Tradeet.',
+		images: ['https://www.tradeet.ng/images/logo.png'],
+		creator: '@tradeet_ng', // Replace with real Twitter handle if available
 	},
 };
+
 
 export default function RootLayout({ children }) {
 	return (
