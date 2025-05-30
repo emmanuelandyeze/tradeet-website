@@ -65,69 +65,69 @@ const Page = async ({ params }) => {
 	);
 };
 
-export async function generateMetadata({ params }) {
-	const { storeLink } = params;
-	console.log(storeLink);
+// export async function generateMetadata({ params }) {
+// 	const { storeLink } = params;
+// 	console.log(storeLink);
 
-	try {
-		const storeData = await getStoreData(storeLink);
+// 	try {
+// 		const storeData = await getStoreData(storeLink);
 
-		return {
-			title: storeData.name,
-			description: storeData
-				? `Welcome to ${storeData.name}`
-				: 'Welcome to Tradeet',
-			// Adding OpenGraph metadata
-			openGraph: {
-				title: storeData.name,
-				description: `Welcome to ${storeData.name}`,
-				url: `https://tradeet.ng/store/${storeLink}`, // Adjust the URL format as needed
-				images: [
-					{
-						url: storeData.logoUrl, // Store banner image
-						width: 1200,
-						height: 630,
-						alt: storeData.name,
-					},
-				],
-				type: 'website',
-			},
-			// Adding Twitter Card metadata for better social sharing
-			twitter: {
-				card: 'summary_large_image',
-				title: storeData.name,
-				description: `Welcome to ${storeData.name}`,
-				images: [storeData.logoUrl], // Store banner image
-			},
-		};
-	} catch (error) {
-		console.error('Error generating metadata:', error);
-		return {
-			title: 'Tradeet Store',
-			description: 'Welcome to Tradeet',
-			openGraph: {
-				title: 'Tradeet Store',
-				description: 'Welcome to Tradeet',
-				url: 'https://tradeet.ng',
-				images: [
-					{
-						url: 'https://tradeet.ng/default-banner.jpg', // Provide a default image
-						width: 1200,
-						height: 630,
-						alt: 'Tradeet Store',
-					},
-				],
-				type: 'website',
-			},
-			twitter: {
-				card: 'summary_large_image',
-				title: 'Tradeet Store',
-				description: 'Welcome to Tradeet',
-				images: ['https://tradeet.ng/default-banner.jpg'], // Default image
-			},
-		};
-	}
-}
+// 		return {
+// 			title: storeData.name,
+// 			description: storeData
+// 				? `Welcome to ${storeData.name}`
+// 				: 'Welcome to Tradeet',
+// 			// Adding OpenGraph metadata
+// 			openGraph: {
+// 				title: storeData.name,
+// 				description: `Welcome to ${storeData.name}`,
+// 				url: `https://tradeet.ng/store/${storeLink}`, // Adjust the URL format as needed
+// 				images: [
+// 					{
+// 						url: storeData.logoUrl, // Store banner image
+// 						width: 1200,
+// 						height: 630,
+// 						alt: storeData.name,
+// 					},
+// 				],
+// 				type: 'website',
+// 			},
+// 			// Adding Twitter Card metadata for better social sharing
+// 			twitter: {
+// 				card: 'summary_large_image',
+// 				title: storeData.name,
+// 				description: `Welcome to ${storeData.name}`,
+// 				images: [storeData.logoUrl], // Store banner image
+// 			},
+// 		};
+// 	} catch (error) {
+// 		console.error('Error generating metadata:', error);
+// 		return {
+// 			title: 'Tradeet Store',
+// 			description: 'Welcome to Tradeet',
+// 			openGraph: {
+// 				title: 'Tradeet Store',
+// 				description: 'Welcome to Tradeet',
+// 				url: 'https://tradeet.ng',
+// 				images: [
+// 					{
+// 						url: 'https://tradeet.ng/default-banner.jpg', // Provide a default image
+// 						width: 1200,
+// 						height: 630,
+// 						alt: 'Tradeet Store',
+// 					},
+// 				],
+// 				type: 'website',
+// 			},
+// 			twitter: {
+// 				card: 'summary_large_image',
+// 				title: 'Tradeet Store',
+// 				description: 'Welcome to Tradeet',
+// 				images: ['https://tradeet.ng/default-banner.jpg'], // Default image
+// 			},
+// 		};
+// 	}
+// }
 
 
 export default Page;
