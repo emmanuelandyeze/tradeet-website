@@ -27,7 +27,7 @@ const HeroSection = () => {
 					place.
 				</p>
 				<a
-					href="https://play.google.com/store/apps/details?id=com.tradeet.vendor&hl=en"
+					href="/dashboard/signup"
 					className="bg-[#05b204] flex flex-row gap-2 items-center inter-font hover:bg-[#04b204e7] text-[#121212] font-bold py-3 md:py-4 px-6 rounded-lg text-md md:text-xl"
 				>
 					<span className="text-white">Start for free</span>

@@ -9,7 +9,7 @@ export function middleware(req) {
 		host === 'tradeet.ng' ||
 		host === 'www.tradeet.ng' ||
 		host === 'localhost:3000' ||
-		host === '192.168.12.140:3000' ||
+		host === '192.168.247.140:3000' ||
 		host.startsWith('localhost:') // Catch all localhost ports
 	) {
 		return NextResponse.next();

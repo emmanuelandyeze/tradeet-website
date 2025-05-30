@@ -4,7 +4,7 @@ import axios from 'axios';
 
 const axiosClient = axios.create({
 	baseURL: 'https://tradeet-api.onrender.com',
-	// baseURL: 'http://192.168.12.140:5000',
+	// baseURL: 'http://192.168.247.140:5000',
 	// timeout: 5000, // Timeout in milliseconds
 	// 'https://tradeet-api.onrender.com'
 	// http://localhost:9000

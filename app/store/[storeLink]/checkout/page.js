@@ -36,7 +36,7 @@ const CheckoutPage = () => {
 	const [selectedCountryCode, setSelectedCountryCode] =
 		useState(countryCodes[0].code);
 	const [store, setStore] = useState(null);
-	const [deliveryFee, setDeliveryFee] = useState(0);
+	const [deliveryFee, setDeliveryFee] = useState(400);
 	const [deliveryServices, setDeliveryServices] = useState(
 		[],
 	);
@@ -343,7 +343,7 @@ const CheckoutPage = () => {
 		}
 	};
 
-	console.log(scheduledTime);
+	// console.log(scheduledTime);
 
 	// Place Order
 	const handlePlaceOrder = async () => {
@@ -502,7 +502,7 @@ const CheckoutPage = () => {
 							{serviceType === 'delivery' && (
 								<>
 									{/* Address Input */}
-									{/* <div className="mb-4">
+									<div className="mb-4">
 										<label className="block mb-1 text-sm">
 											Address*
 										</label>
@@ -512,12 +512,12 @@ const CheckoutPage = () => {
 											className="w-full p-2 text-sm border rounded-lg"
 											required
 										/>
-									</div> */}
-									<StoreLocationPicker
+									</div>
+									{/* <StoreLocationPicker
 										store={store}
 										setDeliveryFee={setDeliveryFee}
 										setLandmark={setAddress}
-									/>
+									/> */}
 								</>
 							)}
 						</div>
