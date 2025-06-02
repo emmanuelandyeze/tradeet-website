@@ -10,610 +10,453 @@ import { FaBagShopping } from 'react-icons/fa6';
 import Modal from '@/components/Modal';
 import toast from 'react-hot-toast';
 import StoreFooter from '@/components/StoreFooter';
-import axios from 'axios';
-import { FiShoppingBag } from 'react-icons/fi';
 import axiosClient from '@/utils/axios';
 
+// New or Enhanced Components (conceptual - you'll create these files)
+import ProductCard from '@/components/ProductCard'; // For individual product display
+import CategoryFilter from '@/components/CategoryFilter'; // For category navigation
+// import CartSidebar from '@/components/CartSidebar'; // For an improved cart experience
+import QuickViewModal from '@/components/QuickViewModal'; // For quick product previews
+
+
+// Helper function to shuffle an array (Fisher-Yates shuffle)
+const shuffleArray = (array) => {
+    let currentIndex = array.length, randomIndex;
+
+    // While there remain elements to shuffle.
+    while (currentIndex !== 0) {
+        // Pick a remaining element.
+        randomIndex = Math.floor(Math.random() * currentIndex);
+        currentIndex--;
+
+        // And swap it with the current element.
+        [array[currentIndex], array[randomIndex]] = [
+            array[randomIndex], array[currentIndex]];
+    }
+
+    return array;
+};
+
 const StorePage = ({ storeData, storeProductsData }) => {
-	const { productsData } = storeProductsData;
-	const [error, setError] = useState(null);
-	const [filteredProducts, setFilteredProducts] = useState(
-		[],
-	);
-	const [categories, setCategories] = useState([]);
-	const [selectedCategory, setSelectedCategory] =
-		useState('All');
-	const [selectedProduct, setSelectedProduct] =
-		useState(null);
-	const [selectedVariants, setSelectedVariants] = useState(
-		[],
-	);
-	const [quantity, setQuantity] = useState(1);
-	const [modalVisible, setModalVisible] = useState(false);
-	const [categoryModalVisible, setCategoryModalVisible] =
-		useState(false);
-	const [categoryProducts, setCategoryProducts] = useState(
-		[],
-	);
-	const router = useRouter();
-	const [cart, setCart] = useState([]);
-	const [totalPrice, setTotalPrice] = useState(0);
-	const [isCartOpen, setIsCartOpen] = useState(false);
+    const { productsData: initialProductsData } = storeProductsData; // Renamed to initialProductsData
+    const [error, setError] = useState(null);
+    const [filteredProducts, setFilteredProducts] = useState(
+        [],
+    );
+    const [categories, setCategories] = useState([]);
+    const [selectedCategory, setSelectedCategory] =
+        useState('All');
+    const [selectedProduct, setSelectedProduct] =
+        useState(null);
+    const [selectedVariants, setSelectedVariants] = useState(
+        [],
+    );
+    const [quantity, setQuantity] = useState(1);
+    const [quickViewModalVisible, setQuickViewModalVisible] = useState(false); // Renamed for clarity
+    const [categoryModalVisible, setCategoryModalVisible] =
+        useState(false);
+    const [categoryProducts, setCategoryProducts] = useState(
+        [],
+    );
+    const router = useRouter();
+    const [cart, setCart] = useState([]);
+    const [totalPrice, setTotalPrice] = useState(0); // For modal/quick view price calculation
+    const [isCartOpen, setIsCartOpen] = useState(false); // Controls cart sidebar visibility
 
-	const handleSearch = useCallback((results) => {
-		setFilteredProducts(results);
-	}, []);
 
-	const addToCart = (product) => {
-		if (selectedVariants.length > 0) {
-			selectedVariants.forEach((variant) => {
-				const existingItemIndex = cart.findIndex(
-					(cartItem) =>
-						cartItem._id === product._id &&
-						cartItem.variant?._id === variant._id,
-				);
-				if (existingItemIndex !== -1) {
-					const newCart = [...cart];
-					newCart[existingItemIndex].quantity +=
-						variant.quantity;
-					setCart(newCart);
-					setIsCartOpen(true);
-					toast.success('Item quantity updated in cart');
-				} else {
-					setCart([
-						...cart,
-						{
-							...product,
-							variant,
-							quantity: variant.quantity,
-						},
-					]);
-					setIsCartOpen(true);
-					toast.success('Item added to cart');
-				}
-			});
-		} else {
-			const existingItemIndex = cart.findIndex(
-				(cartItem) => cartItem._id === product._id,
-			);
-			if (existingItemIndex !== -1) {
-				const newCart = [...cart];
-				newCart[existingItemIndex].quantity += quantity;
-				setCart(newCart);
-				setIsCartOpen(true);
-				toast.success('Item quantity updated in cart');
-			} else {
-				setCart([
-					...cart,
-					{
-						...product,
-						quantity,
-					},
-				]);
-				setIsCartOpen(true);
-				toast.success('Item added to cart');
-			}
-		}
+    // Debounced search to avoid excessive re-renders/API calls on every keystroke
+    const handleSearch = useCallback((searchTerm) => {
+        if (!searchTerm) {
+            // When search term is empty, re-apply category filter or show all shuffled products
+            if (selectedCategory === 'All') {
+                setFilteredProducts(shuffleArray([...initialProductsData])); // Shuffle again if search is cleared
+            } else {
+                setFilteredProducts(
+                    shuffleArray([...initialProductsData]).filter(
+                        (product) => product.category && product.category.name === selectedCategory
+                    )
+                );
+            }
+            return;
+        }
+        const results = shuffleArray([...initialProductsData]).filter(product => // Shuffle before filtering for search
+            product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            product.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            (product.category && product.category.name.toLowerCase().includes(searchTerm.toLowerCase()))
+        );
+        setFilteredProducts(results);
+    }, [initialProductsData, selectedCategory]);
 
-		setModalVisible(false);
-		setCategoryModalVisible(false);
-		setQuantity(1);
-		setSelectedVariants([]);
-		setTotalPrice(0);
-	};
 
-	const handleVariantChange = (
-		index,
-		variantId,
-		quantity,
-	) => {
-		const variant = selectedProduct.variants.find(
-			(v) => v._id === variantId,
-		);
-		const newSelectedVariants = [...selectedVariants];
-		newSelectedVariants[index] = { ...variant, quantity };
-		setSelectedVariants(newSelectedVariants);
+    const addToCart = (productToAdd) => {
+        // Determine the item's price and ID based on whether it has variants or not
+        let itemPrice = productToAdd.price;
+        let itemIdentifier = productToAdd._id; // Base product ID
 
-		const newTotalPrice = newSelectedVariants.reduce(
-			(total, item) => total + item.price * item.quantity,
-			0,
-		);
-		setTotalPrice(newTotalPrice);
-	};
+        let newCartItem = { ...productToAdd };
 
-	const handleQuantityChange = (newQuantity) => {
-		setQuantity(newQuantity);
-		setTotalPrice(selectedProduct.price * newQuantity);
-	};
+        if (selectedVariants.length > 0 && productToAdd.variants?.length > 0) {
+            // Logic for adding selected variants
+            selectedVariants.forEach(variant => {
+                const existingItemIndex = cart.findIndex(
+                    (cartItem) => cartItem._id === productToAdd._id && cartItem.variant?._id === variant._id
+                );
 
-	const addNewVariantSelection = () => {
-		setSelectedVariants([
-			...selectedVariants,
-			{ ...selectedProduct.variants[0], quantity: 1 },
-		]);
-	};
+                const itemWithVariant = {
+                    ...productToAdd,
+                    variant: variant,
+                    quantity: variant.quantity,
+                    price: variant.price // Use variant price for calculation
+                };
 
-	const removeVariantSelection = (index) => {
-		const newSelectedVariants = [...selectedVariants];
-		newSelectedVariants.splice(index, 1);
-		setSelectedVariants(newSelectedVariants);
+                if (existingItemIndex !== -1) {
+                    const newCart = [...cart];
+                    newCart[existingItemIndex].quantity += variant.quantity;
+                    setCart(newCart);
+                    toast.success('Item quantity updated in cart!');
+                } else {
+                    setCart((prevCart) => [...prevCart, itemWithVariant]);
+                    toast.success('Item added to cart!');
+                }
+            });
+        } else {
+            // Logic for adding a simple product
+            const existingItemIndex = cart.findIndex(
+                (cartItem) => cartItem._id === productToAdd._id
+            );
 
-		const newTotalPrice = newSelectedVariants.reduce(
-			(total, item) => total + item.price * item.quantity,
-			0,
-		);
-		setTotalPrice(newTotalPrice);
-	};
+            if (existingItemIndex !== -1) {
+                const newCart = [...cart];
+                newCart[existingItemIndex].quantity += quantity;
+                setCart(newCart);
+                toast.success('Item quantity updated in cart!');
+            } else {
+                setCart((prevCart) => [...prevCart, { ...productToAdd, quantity }]);
+                toast.success('Item added to cart!');
+            }
+        }
 
-	useEffect(() => {
-		async function fetchCategory() {
-			try {
-				const response = await axiosClient.get(
-					`/category/${storeData?._id}`,
-				);
-				setCategories(response.data);
-			} catch (err) {
-				console.error('Error fetching categories:', err);
-				toast.error('Failed to load categories');
-			}
-		}
-		if (storeData?._id) {
-			fetchCategory();
-		}
-	}, [storeData?._id]);
+        setIsCartOpen(true); // Open cart sidebar on add
+        setQuickViewModalVisible(false); // Close quick view modal
+        setQuantity(1); // Reset quantity for next selection
+        setSelectedVariants([]); // Reset selected variants
+        setTotalPrice(0); // Reset total price for next selection
+    };
 
-	console.log(categories)
+    const handleVariantChange = useCallback((index, variantId, qty) => {
+        setSelectedVariants(prevVariants => {
+            const newSelectedVariants = [...prevVariants];
+            const variant = selectedProduct.variants.find(v => v._id === variantId);
+            if (variant) {
+                newSelectedVariants[index] = { ...variant, quantity: qty };
+            }
+            // Recalculate total price for the modal
+            const newTotalPrice = newSelectedVariants.reduce(
+                (total, item) => total + item.price * item.quantity,
+                0
+            );
+            setTotalPrice(newTotalPrice);
+            return newSelectedVariants;
+        });
+    }, [selectedProduct]);
 
-	useEffect(() => {
-		if (storeData?.serviceType !== 'services') {
-			if (selectedCategory === 'All') {
-				setFilteredProducts(productsData);
-			} else {
-				setFilteredProducts(
-					productsData.filter(
-						(product) =>
-							product.category &&
-							product.category.name === selectedCategory,
-					),
-				);
-			}
-		}
-	}, [
-		selectedCategory,
-		productsData,
-		storeData?.serviceType,
-	]);
+    const handleQuantityChange = useCallback((newQuantity) => {
+        setQuantity(newQuantity);
+        if (selectedProduct && selectedProduct.variants?.length === 0) {
+            setTotalPrice(selectedProduct.price * newQuantity);
+        }
+    }, [selectedProduct]);
 
-	const handleCategorySelect = (categoryName) => {
-		if (storeData?.serviceType === 'services') {
-			const categoryProducts = productsData.filter(
-				(product) =>
-					product.category &&
-					product.category.name === categoryName,
-			);
-			setCategoryProducts(categoryProducts);
-			setSelectedCategory(categoryName);
-			setCategoryModalVisible(true);
-		} else {
-			setSelectedCategory(
-				categoryName === selectedCategory
-					? 'All'
-					: categoryName,
-			);
-		}
-	};
+    const addNewVariantSelection = () => {
+        if (selectedProduct?.variants?.length > 0) {
+            setSelectedVariants(prevVariants => [
+                ...prevVariants,
+                { ...selectedProduct.variants[0], quantity: 1 }
+            ]);
+        }
+    };
 
-	if (error) {
-		return (
-			<div className="min-h-screen max-w-3xl mx-auto flex justify-center items-center">
-				<StoreCard />
-			</div>
-		);
-	}
+    const removeVariantSelection = (index) => {
+        setSelectedVariants(prevVariants => {
+            const newSelectedVariants = [...prevVariants];
+            newSelectedVariants.splice(index, 1);
+            // Recalculate total price for the modal
+            const newTotalPrice = newSelectedVariants.reduce(
+                (total, item) => total + item.price * item.quantity,
+                0
+            );
+            setTotalPrice(newTotalPrice);
+            return newSelectedVariants;
+        });
+    };
 
-	if (!storeData || !storeProductsData) {
-		return (
-			<div className="min-h-screen flex items-center justify-center">
-				<RotatingSquare
-					height="100"
-					width="100"
-					color={storeData?.themeColor || '#4fa94d'}
-					ariaLabel="rotating-square-loading"
-					strokeWidth="4"
-					wrapperStyle={{}}
-					wrapperClass=""
-					visible={true}
-				/>
-			</div>
-		);
-	}
+    // Fetch categories on storeData change
+    useEffect(() => {
+        async function fetchCategory() {
+            try {
+                const response = await axiosClient.get(`/category/${storeData?._id}`);
+                setCategories(response.data);
+            } catch (err) {
+                console.error('Error fetching categories:', err);
+                toast.error('Failed to load categories');
+            }
+        }
+        if (storeData?._id) {
+            fetchCategory();
+        }
+    }, [storeData?._id]);
 
-	return (
-		<div>
-			<StoreNavbar
-				storeData={storeData}
-				cart={cart}
-				setCart={setCart}
-				isCartOpen={isCartOpen}
-				setIsCartOpen={setIsCartOpen}
-			/>
-			<div className="container min-h-screen max-w-6xl pb-20 mx-auto pt-20 px-4">
-				{storeData?.storeBanner ? (
-					<div className="mb-5">
-						<img
-							src={storeData?.storeBanner}
-							alt={storeData?.name}
-							className="w-full h-48 md:h-[26rem] p-0 bg-gray-100 md:object-cover object-cover shadow-md rounded-xl"
-						/>
-					</div>
-				) : (
-					<div
-						className="pb-10 md:pb-20 px-5 md:px-0 pt-10 md:pt-20 rounded-xl shadow-sm mb-5"
-						style={{
-							backgroundColor:
-								storeData?.themeColor || '#f1f1f1',
-							color: storeData?.themeColor
-								? '#f1f1f1'
-								: '#121212',
-						}}
-					>
-						<h1 className="text-2xl md:text-3xl font-bold text-center mb-4">
-							Welcome to {storeData?.name}
-						</h1>
-						<p className="text-md md:text-lg text-center">
-							{storeData?.description}
-						</p>
-					</div>
-				)}
 
-				{/* <SearchBar
-					items={productsData}
-					onSearch={handleSearch}
-					storeData={storeData}
-				/> */}
+    // Initial shuffle and subsequent filtering based on category or service type
+    useEffect(() => {
+        if (!initialProductsData || initialProductsData.length === 0) {
+            setFilteredProducts([]);
+            return;
+        }
 
-				{storeData?.serviceType === 'services' ? (
-					<div className="text-center">
-						{/* <FaBagShopping className="mx-auto text-4xl text-gray-300 mb-4" />
-						<p className="text-gray-500">
-							Select a category to view offerings
-						</p> */}
-					</div>
-				) : (
-					<div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 md:gap-6">
-						{filteredProducts?.length > 0 ? (
-							filteredProducts.map((product) => (
-								<div
-									key={product._id}
-									className="rounded-xl p-0 cursor-pointer border hover:shadow-md transition-shadow duration-200 relative"
-									onClick={() =>
-										router.push(
-											`/store/${storeData?.storeLink}/product/${product?._id}`,
-										)
-									}
-								>
-									<img
-										src={product.image}
-										alt={product.name}
-										className="w-full h-40 md:h-60 p-0 bg-gray-100 object-cover rounded-t-xl"
-									/>
-									<div className="mb-0 mt-0 px-2">
-										<h2 className="text-md capitalize md:text-lg pt-3 font-medium truncate">
-											{product.name}
-										</h2>
-										<p className="text-gray-500 text-xs md:text-sm">
-											{product?.category?.name}
-										</p>
-										<p className="text-gray-700 flex flex-row items-start gap-1 mt-2 pb-2 text-md md:text-lg font-normal md:text-md">
-											<span className="text-slate-900 font-semibold">
-												₦{' '}
-												{new Intl.NumberFormat(
-													'en-US',
-												).format(product.price)}
-											</span>
-										</p>
-									</div>
-								</div>
-							))
-						) : (
-							<div className="col-span-full text-center py-10">
-								<p className="text-gray-500">
-									No products found
-								</p>
-							</div>
-						)}
-					</div>
-				)}
+        let productsToFilter = shuffleArray([...initialProductsData]); // Always start with a fresh shuffle of ALL initial products
 
-				<div className="flex overflow-x-auto space-x-2 pb-4 mb-3">
-					{storeData?.serviceType !== 'services' && (
-						<div
-							className={`px-6 py-2 bg-gray-200 rounded-lg cursor-pointer min-w-max ${
-								selectedCategory === 'All'
-									? 'bg-green-600 text-white'
-									: 'hover:bg-gray-300'
-							}`}
-							onClick={() => setSelectedCategory('All')}
-						>
-							<h3 className="text-xs md:text-md font-semibold">
-								All
-							</h3>
-						</div>
-					)}
+        if (storeData?.serviceType !== 'services') {
+            if (selectedCategory === 'All') {
+                setFilteredProducts(productsToFilter);
+            } else {
+                setFilteredProducts(
+                    productsToFilter.filter(
+                        (product) => product.category && product.category.name === selectedCategory
+                    )
+                );
+            }
+        } else {
+            // For services, the category selection triggers a modal, not direct filtering on the main page
+            // So, for the main display, we want all services shuffled
+            setFilteredProducts(productsToFilter);
+        }
+    }, [selectedCategory, initialProductsData, storeData?.serviceType]); // Depend on initialProductsData
 
-					{storeData?.serviceType === 'services' && (
-						<div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-							{categories?.map((category) => (
-								<div
-									key={category._id}
-									className={`flex flex-col px-5 py-2 bg-gray-200 rounded-lg h-30 w-[100%] md:h-60 justify-center items-center text-xs md:text-md cursor-pointer ${
-										storeData?.serviceType !== 'services' &&
-										selectedCategory === category.name
-											? 'bg-green-600 text-white'
-											: 'hover:bg-gray-300'
-									}`}
-									onClick={() =>
-										router.push(
-											`/store/${storeData.storeLink}/categories/${category.slug}`,
-										)
-									}
-								>
-									{category.image ? (
-										<img
-											src={category.image}
-											alt={category.name}
-											className="w-40 h-40 rounded-full object-cover"
-										/>
-									) : (
-										<FiShoppingBag
-											className="text-[100px]"
-											color="gray"
-										/>
-									)}
+    const handleCategorySelect = useCallback((categoryName) => {
+        if (storeData?.serviceType === 'services') {
+            const productsInSelectedCategory = initialProductsData.filter( // Filter from initial, unshuffled data
+                (product) => product.category && product.category.name === categoryName
+            );
+            setCategoryProducts(shuffleArray([...productsInSelectedCategory])); // Shuffle products in the category modal
+            setSelectedCategory(categoryName); // Keep track of the selected category
+            setCategoryModalVisible(true); // Open modal for service categories
+        } else {
+            // For products, toggle the category selection
+            setSelectedCategory(prevCategory =>
+                prevCategory === categoryName ? 'All' : categoryName
+            );
+        }
+    }, [initialProductsData, storeData?.serviceType]);
 
-									<h3 className="text-lg md:text-xl mt-2 md:text-md text-center font-semibold">
-										{category.name}
-									</h3>
-								</div>
-							))}
-						</div>
-					)}
-				</div>
-			</div>
 
-			{/* Product Detail Modal */}
-			{modalVisible && selectedProduct && (
-				<Modal onClose={() => setModalVisible(false)}>
-					<div className="p-4 w-full">
-						<img
-							src={selectedProduct.image}
-							alt={selectedProduct.name}
-							className="w-full h-80 p-0 bg-gray-100 mb-4 my-2 object-cover rounded-lg"
-						/>
-						<h2 className="text-lg font-bold capitalize mb-2">
-							{selectedProduct.name}
-						</h2>
-						<p className="text-gray-600 mb-4">
-							{selectedProduct.description}
-						</p>
+    // Handle product click for quick view
+    const handleProductClick = useCallback((product) => {
+        setSelectedProduct(product);
+        setQuantity(1); // Reset quantity
+        setSelectedVariants(product.variants?.length > 0 ? [{ ...product.variants[0], quantity: 1 }] : []); // Pre-select first variant if available
+        setTotalPrice(product.variants?.length > 0 ? product.variants[0].price : product.price); // Set initial price
+        setQuickViewModalVisible(true);
+    }, []);
 
-						{selectedProduct.variants?.length > 0 ? (
-							<>
-								{selectedVariants.map(
-									(selectedVariant, index) => (
-										<div
-											key={index}
-											className="my-4 p-3 border rounded-lg"
-										>
-											<div className="flex justify-between items-center mb-2">
-												<p className="font-medium">
-													Variant #{index + 1}
-												</p>
-												{selectedVariants.length > 1 && (
-													<button
-														onClick={() =>
-															removeVariantSelection(index)
-														}
-														className="text-red-500 text-sm"
-													>
-														Remove
-													</button>
-												)}
-											</div>
-											<select
-												className="w-full p-2 border rounded-lg mb-3"
-												value={selectedVariant._id}
-												onChange={(e) =>
-													handleVariantChange(
-														index,
-														e.target.value,
-														selectedVariant.quantity,
-													)
-												}
-											>
-												{selectedProduct.variants.map(
-													(variant) => (
-														<option
-															key={variant._id}
-															value={variant._id}
-														>
-															{variant.name} - ₦{' '}
-															{new Intl.NumberFormat(
-																'en-US',
-															).format(variant.price)}
-														</option>
-													),
-												)}
-											</select>
-											<div className="flex justify-between items-center">
-												<div>
-													<p className="text-sm">
-														Quantity
-													</p>
-												</div>
-												<div className="flex items-center border rounded-lg">
-													<button
-														onClick={() =>
-															handleVariantChange(
-																index,
-																selectedVariant._id,
-																Math.max(
-																	selectedVariant.quantity -
-																		1,
-																	1,
-																),
-															)
-														}
-														className="bg-gray-200 rounded-tl-lg rounded-bl-lg px-4 py-2"
-													>
-														-
-													</button>
-													<span className="mx-4 text-md">
-														{selectedVariant.quantity}
-													</span>
-													<button
-														onClick={() =>
-															handleVariantChange(
-																index,
-																selectedVariant._id,
-																selectedVariant.quantity +
-																	1,
-															)
-														}
-														className="bg-gray-200 rounded-tr-lg rounded-br-lg px-4 py-2"
-													>
-														+
-													</button>
-												</div>
-											</div>
-										</div>
-									),
-								)}
-								<button
-									onClick={addNewVariantSelection}
-									className="w-full py-2 text-sm text-blue-500 border border-blue-500 rounded-lg mb-4"
-								>
-									+ Add Another Variant
-								</button>
-							</>
-						) : (
-							<div className="my-4">
-								<div className="flex justify-between items-center my-4">
-									<div>
-										<p>Quantity</p>
-									</div>
-									<div className="flex items-center border rounded-lg">
-										<button
-											onClick={() =>
-												handleQuantityChange(
-													Math.max(quantity - 1, 1),
-												)
-											}
-											className="bg-gray-200 rounded-tl-lg rounded-bl-lg px-4 py-2"
-										>
-											-
-										</button>
-										<span className="mx-4 text-md">
-											{quantity}
-										</span>
-										<button
-											onClick={() =>
-												handleQuantityChange(quantity + 1)
-											}
-											className="bg-gray-200 rounded-tr-lg rounded-br-lg px-4 py-2"
-										>
-											+
-										</button>
-									</div>
-								</div>
-							</div>
-						)}
-						<hr className="my-4" />
-						<div className="flex justify-between items-center my-4">
-							<p className="text-lg font-semibold">
-								Total Price: ₦
-								{new Intl.NumberFormat('en-US').format(
-									totalPrice ||
-										selectedProduct.price * quantity,
-								)}
-							</p>
-							<button
-								onClick={() => addToCart(selectedProduct)}
-								style={{
-									backgroundColor: storeData?.themeColor,
-								}}
-								className="text-white px-4 py-2 rounded-lg hover:opacity-90 transition-opacity"
-							>
-								Add to Cart
-							</button>
-						</div>
-					</div>
-				</Modal>
-			)}
+    // Loading and Error States
+    if (error) {
+        return (
+            <div className="min-h-screen max-w-3xl mx-auto flex justify-center items-center">
+                <StoreCard /> {/* Placeholder for error display */}
+                <p className="text-red-500 text-lg">Error loading store data. Please try again later.</p>
+            </div>
+        );
+    }
 
-			{/* Category Products Modal (for services) */}
-			{categoryModalVisible && (
-				<Modal
-					onClose={() => setCategoryModalVisible(false)}
-					title={selectedCategory}
-				>
-					<div className="max-h-[70vh] overflow-y-auto">
-						{categoryProducts.length > 0 ? (
-							categoryProducts.map((product) => (
-								<div
-									key={product._id}
-									className="p-4 border-b cursor-pointer hover:bg-gray-50"
-									// onClick={() => {
-									// 	setSelectedProduct(product);
-									// 	setModalVisible(true);
-									// 	setCategoryModalVisible(false);
-									// }}
-									onClick={() =>
-										router.push(
-											`/store/${storeData?.storeLink}/product/${product?._id}`,
-										)
-									}
-								>
-									<div className="flex items-center">
-										<img
-											src={product.image}
-											alt={product.name}
-											className="w-16 h-16 object-cover rounded-lg mr-4"
-										/>
-										<div>
-											<h3 className="font-medium">
-												{product.name}
-											</h3>
-											<p className="text-gray-600">
-												₦{' '}
-												{new Intl.NumberFormat(
-													'en-US',
-												).format(product.price)}
-											</p>
-											{product.description && (
-												<p className="text-gray-500 text-sm mt-1 line-clamp-2">
-													{product.description}
-												</p>
-											)}
-										</div>
-									</div>
-								</div>
-							))
-						) : (
-							<div className="text-center py-10">
-								<FaBagShopping className="mx-auto text-4xl text-gray-300 mb-4" />
-								<p className="text-gray-500">
-									No services found in this category
-								</p>
-							</div>
-						)}
-					</div>
-				</Modal>
-			)}
+    if (!storeData || !storeProductsData) {
+        return (
+            <div className="min-h-screen flex items-center justify-center bg-gray-50">
+                <RotatingSquare
+                    height="100"
+                    width="100"
+                    color={storeData?.themeColor || '#4fa94d'}
+                    ariaLabel="rotating-square-loading"
+                    strokeWidth="4"
+                    visible={true}
+                />
+            </div>
+        );
+    }
 
-			<StoreFooter storeData={storeData} />
-		</div>
-	);
+    return (
+        <div className="flex flex-col min-h-screen">
+            <StoreNavbar
+                storeData={storeData}
+                cart={cart}
+                setCart={setCart}
+                isCartOpen={isCartOpen}
+                setIsCartOpen={setIsCartOpen}
+            />
+
+            <main className="flex-grow container max-w-7xl mx-auto py-20 px-4">
+                {/* Store Banner/Header Section */}
+                {storeData?.storeBanner ? (
+                    <div className="mb-8 rounded-xl overflow-hidden shadow-md">
+                        <img
+                            src={storeData?.storeBanner}
+                            alt={`${storeData?.name} banner`}
+                            className="w-full h-48 md:h-[26rem] object-cover"
+                        />
+                    </div>
+                ) : (
+                    <div
+                        className="py-10 md:py-20 px-5 md:px-0 rounded-xl shadow-sm mb-8 text-center"
+                        style={{
+                            backgroundColor: storeData?.themeColor || '#f1f1f1',
+                            color: storeData?.themeColor ? '#f1f1f1' : '#121212',
+                        }}
+                    >
+                        <h1 className="text-3xl md:text-5xl font-extrabold mb-4 animate-fadeIn">
+                            Welcome to {storeData?.name}
+                        </h1>
+                        <p className="text-md md:text-lg opacity-90">
+                            {storeData?.description}
+                        </p>
+                    </div>
+                )}
+
+                {/* Search and Category Filters */}
+                <div className="mb-8 flex flex-col md:flex-row items-center gap-4">
+                    <div className="flex-grow w-full md:w-auto">
+                         <SearchBar
+                            items={initialProductsData} // Pass the original, unshuffled data to search bar
+                            onSearch={handleSearch}
+                            storeData={storeData}
+                            placeholder={`Search products...`}
+                        />
+                    </div>
+
+                    <div className="w-full md:w-auto overflow-x-auto">
+                        <CategoryFilter
+                            categories={categories}
+                            selectedCategory={selectedCategory}
+                            onSelectCategory={handleCategorySelect}
+                            serviceType={storeData?.serviceType}
+                            themeColor={storeData?.themeColor}
+                        />
+                    </div>
+                </div>
+
+                {/* Product/Service Listing */}
+                <section>
+                    <h2 className="text-2xl font-bold mb-6 text-gray-800">
+                       Our Catalogue
+                    </h2>
+
+                    <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 md:gap-6">
+                        {filteredProducts?.length > 0 ? (
+                            filteredProducts.map((product) => (
+                                <ProductCard
+                                    key={product._id}
+                                    product={product}
+                                    storeLink={storeData?.storeLink}
+                                    serviceType={storeData?.serviceType}
+                                    themeColor={storeData?.themeColor}
+                                    onQuickView={handleProductClick}
+                                />
+                            ))
+                        ) : (
+                            <div className="col-span-full text-center py-16">
+                                <FaBagShopping className="mx-auto text-6xl text-gray-300 mb-6" />
+                                <p className="text-gray-500 text-lg font-medium">
+                                    No {storeData?.serviceType === 'services' ? 'services' : 'products'} found in this category.
+                                </p>
+                                <button
+                                    onClick={() => setSelectedCategory('All')}
+                                    className="mt-4 text-blue-600 hover:underline"
+                                >
+                                    View All {storeData?.serviceType === 'services' ? 'Services' : 'Products'}
+                                </button>
+                            </div>
+                        )}
+                    </div>
+                </section>
+            </main>
+
+            {/* Quick View Modal */}
+            {quickViewModalVisible && selectedProduct && (
+                <QuickViewModal
+                    product={selectedProduct}
+                    quantity={quantity}
+                    setQuantity={handleQuantityChange}
+                    selectedVariants={selectedVariants}
+                    handleVariantChange={handleVariantChange}
+                    addNewVariantSelection={addNewVariantSelection}
+                    removeVariantSelection={removeVariantSelection}
+                    totalPrice={totalPrice}
+                    addToCart={() => addToCart(selectedProduct)}
+                    onClose={() => setQuickViewModalVisible(false)}
+                    storeThemeColor={storeData?.themeColor}
+                />
+            )}
+
+            {/* Category Products Modal (for services - still useful for detailed view) */}
+            {categoryModalVisible && storeData?.serviceType === 'services' && (
+                <Modal
+                    onClose={() => setCategoryModalVisible(false)}
+                    title={`Services in ${selectedCategory}`}
+                >
+                    <div className="max-h-[70vh] overflow-y-auto p-4">
+                        {categoryProducts.length > 0 ? (
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                {categoryProducts.map((product) => (
+                                    <div
+                                        key={product._id}
+                                        className="flex items-center p-4 border rounded-lg shadow-sm hover:shadow-md transition-shadow duration-200 cursor-pointer"
+                                        onClick={() =>
+                                            router.push(`/store/${storeData?.storeLink}/product/${product?._id}`)
+                                        }
+                                    >
+                                        <img
+                                            src={product.image}
+                                            alt={product.name}
+                                            className="w-24 h-24 object-cover rounded-md mr-4 flex-shrink-0"
+                                        />
+                                        <div>
+                                            <h3 className="font-semibold text-base">{product.name}</h3>
+                                            <p className="text-gray-600 text-sm">
+                                                ₦{' '}
+                                                {new Intl.NumberFormat('en-US').format(product.price)}
+                                            </p>
+                                            {product.description && (
+                                                <p className="text-gray-500 text-xs line-clamp-2">
+                                                    {product.description}
+                                                </p>
+                                            )}
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        ) : (
+                            <div className="text-center py-10">
+                                <FaBagShopping className="mx-auto text-4xl text-gray-300 mb-4" />
+                                <p className="text-gray-500">
+                                    No services found in this category.
+                                </p>
+                            </div>
+                        )}
+                    </div>
+                </Modal>
+            )}
+
+            {/* Cart Sidebar */}
+            {/* <CartSidebar
+                cart={cart}
+                setCart={setCart}
+                isCartOpen={isCartOpen}
+                setIsCartOpen={setIsCartOpen}
+                storeData={storeData}
+            /> */}
+
+            <StoreFooter storeData={storeData} />
+        </div>
+    );
 };
 
 export default StorePage;

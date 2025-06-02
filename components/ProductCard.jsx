@@ -1,83 +1,73 @@
+// Example ProductCard.jsx
+import React from 'react';
 import { useRouter } from 'next/navigation';
-import { FaBagShopping } from 'react-icons/fa6';
-import { GiHotMeal } from 'react-icons/gi';
+import { FaEye } from 'react-icons/fa'; // For quick view icon
 
 const ProductCard = ({
 	product,
+	storeLink,
+	serviceType,
 	themeColor,
-	storeData,
+	onQuickView,
 }) => {
 	const router = useRouter();
 
+	const handleCardClick = () => {
+		router.push(
+			`/store/${storeLink}/product/${product?._id}`,
+		);
+	};
+
+	const handleQuickViewClick = (e) => {
+		e.stopPropagation(); // Prevent card click from firing
+		onQuickView(product);
+	};
+
 	return (
-		<div
-			className="relative aspect-square rounded-lg overflow-hidden group cursor-pointer"
-			onClick={() =>
-				router.push(
-					`/store/${storeData?.storeLink}/product/${product?._id}`,
-				)
-			}
-		>
-			{/* Product Image with Darkened Overlay */}
-			<div className="absolute inset-0 bg-black/20 group-hover:bg-black/40 transition-all duration-300 hover:shadow-md">
-				{product.image ? (
-					<img
-						src={product.image}
-						alt={product.name}
-						className="w-full h-full object-cover"
-					/>
-				) : (
-					<div className="w-full h-full flex items-center justify-center text-gray-400 bg-gray-100">
-						<GiHotMeal className="text-6xl" />
-					</div>
+		<div className="rounded-xl border hover:shadow-lg transition-shadow duration-300 relative flex flex-col overflow-hidden group">
+			<div className="relative overflow-hidden w-full h-40 md:h-60">
+				<img
+					src={product.image}
+					alt={product.name}
+					className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105 rounded-t-xl"
+				/>
+				{serviceType !== 'services' && (
+					<button
+						onClick={handleQuickViewClick}
+						className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-40 text-white opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+						title="Quick View"
+					>
+						<FaEye className="text-3xl" />
+					</button>
 				)}
 			</div>
-
-			{/* Product Info (Always Visible) */}
-			{/* <div className="absolute bottom-0 left-0 group-hover:opacity-0 right-0 p-4 text-white z-10">
-				<h3 className="font-bold text-xl line-clamp-1 drop-shadow-md">
+			<div className="p-3 flex flex-col flex-grow">
+				<h3 className="text-md capitalize md:text-lg font-semibold truncate mb-1">
 					{product.name}
 				</h3>
-				<p
-					className="font-semibold text-lg drop-shadow-md"
-					style={{ color: themeColor || '#ffffff' }}
-				>
-					₦{product.price.toFixed(2).toLocaleString()}
+				<p className="text-gray-500 text-xs md:text-sm mb-2">
+					{product?.category?.name}
 				</p>
-			</div> */}
+				{serviceType !== 'services' && (
+					<p className="text-slate-900 font-bold text-lg md:text-xl mt-auto">
+						₦{' '}
+						{new Intl.NumberFormat('en-US').format(
+							product.price,
+						)}
+					</p>
+				)}
 
-			{/* Hover Overlay with Description */}
-			<div className="absolute inset-0 flex flex-col justify-end p-4 bg-gradient-to-t from-black/80 via-black/50 to-transparent opacity-100 transition-opacity duration-300">
-				<div className="mt-auto">
-					<h3 className="font-bold text-xl text-white mb-1 line-clamp-1">
-						{product.name}
-					</h3>
-					<p className="text-gray-200 text-sm line-clamp-2 ">
-						{product.description}
-					</p>
-					<p
-						className="font-semibold text-xl drop-shadow-md mb-3"
-						style={{ color: themeColor || '#ffffff' }}
-					>
-						₦{product.price.toFixed(2).toLocaleString()}
-					</p>
-					<button
-						className="flex items-center gap-2 px-4 py-2 rounded-full font-medium"
-						style={{
-							backgroundColor: themeColor || '#4f46e5',
-							color: '#ffffff',
-						}}
-						onClick={(e) => {
-							e.stopPropagation();
-							router.push(
-								`/store/${storeData?.storeLink}/product/${product?._id}`,
-							);
-						}}
-					>
-						<FaBagShopping />
-						<span>Buy now</span>
-					</button>
-				</div>
+				<button
+					onClick={handleCardClick}
+					style={{
+						backgroundColor: themeColor || '#4fa94d',
+					}}
+					className="mt-3 w-full text-white py-2 rounded-lg text-sm md:text-base hover:opacity-90 transition-opacity duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2"
+				>
+					{serviceType === 'services'
+						? 'Add to Cart'
+						: 'Add to Cart'}
+				</button>
 			</div>
 		</div>
 	);

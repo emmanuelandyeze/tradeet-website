@@ -1,44 +1,34 @@
-'use client';
-
-import React, { useState, useEffect } from 'react';
+// Example SearchBar.jsx
+import React, { useState, useEffect, useRef } from 'react';
 import { FaSearch } from 'react-icons/fa';
+import { useDebounce } from 'use-debounce'; // You'll need to install this: npm install use-debounce
 
-const SearchBar = ({ items, onSearch, storeData }) => {
+const SearchBar = ({
+	items,
+	onSearch,
+	storeData,
+	placeholder = 'Search products...',
+}) => {
 	const [searchTerm, setSearchTerm] = useState('');
+	const [debouncedSearchTerm] = useDebounce(
+		searchTerm,
+		500,
+	); // Debounce for 500ms
 
 	useEffect(() => {
-		const filteredItems = items?.filter(
-			(item) =>
-				item.name
-					.toLowerCase()
-					.includes(searchTerm?.toLowerCase()) ||
-				item.description
-					.toLowerCase()
-					.includes(searchTerm?.toLowerCase()),
-		);
-		onSearch(filteredItems);
-	}, [searchTerm, items, onSearch]);
-
-	const handleInputChange = (e) => {
-		setSearchTerm(e.target.value);
-	};
+		onSearch(debouncedSearchTerm);
+	}, [debouncedSearchTerm, onSearch]);
 
 	return (
-		<div className="flex justify-center mb-4">
+		<div className="relative w-full rounded-full shadow-sm border border-gray-200 focus-within:border-gray-400 transition-colors duration-200">
 			<input
 				type="text"
+				placeholder={placeholder}
 				value={searchTerm}
-				onChange={handleInputChange}
-				className="border py-4 px-3 rounded-l-lg focus:border-[1px] focus:border-gray-100 w-full md:w-2/3"
-				placeholder="Search for products..."
+				onChange={(e) => setSearchTerm(e.target.value)}
+				className="w-full pl-5 pr-12 py-3 rounded-full text-gray-700 focus:outline-none text-base"
 			/>
-			<button
-				onClick={() => onSearch(filteredItems)}
-				style={{ backgroundColor: storeData?.themeColor || '#000' }}
-				className="text-white p-4 rounded-r-lg"
-			>
-				<FaSearch size={24} />
-			</button>
+			<FaSearch className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 text-lg" />
 		</div>
 	);
 };
