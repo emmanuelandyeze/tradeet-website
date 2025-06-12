@@ -61,15 +61,21 @@ const Hero = () => {
 
 						{/* CTA Buttons */}
 						<div className="flex flex-col sm:flex-row gap-4">
-							<button className="group bg-[#065637] text-white px-8 py-4 rounded-xl font-semibold text-lg hover:bg-[#065637]/90 transition-all transform hover:scale-105 flex items-center justify-center space-x-2">
+							<a
+								href="https://play.google.com/store/apps/details?id=com.tradeet.vendor&hl=en&pli=1"
+								className="group bg-[#065637] text-white px-8 py-4 rounded-xl font-semibold text-lg hover:bg-[#065637]/90 transition-all transform hover:scale-105 flex items-center justify-center space-x-2"
+							>
 								<span>Get the App Free</span>
 								<ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
-							</button>
+							</a>
 
-							<button className="group border-2 border-[#065637] text-[#065637] px-8 py-4 rounded-xl font-semibold text-lg hover:bg-[#065637] hover:text-white transition-all flex items-center justify-center space-x-2">
+							<a
+								href="https://chat.whatsapp.com/Du8xWBkUB8d66fuq0Qd7ul"
+								className="group border-2 border-[#065637] text-[#065637] px-8 py-4 rounded-xl font-semibold text-lg hover:bg-[#065637] hover:text-white transition-all flex items-center justify-center space-x-2"
+							>
 								<Users className="w-5 h-5" />
 								<span>Join the Community</span>
-							</button>
+							</a>
 						</div>
 
 						{/* Trust Indicators */}

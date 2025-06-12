@@ -28,7 +28,7 @@ export default function Home() {
 			<Pricing />
 			<Faq />
 			<FinalCTA />
-			{/* <Footer /> */}
+			<Footer />
 		</div>
 	);
 }

@@ -68,9 +68,12 @@ const Header = () => {
 						{/* <button className="text-[#065637] hover:text-[#065637]/80 font-medium transition-colors">
 							Sign In
 						</button> */}
-						<button className="bg-[#065637] text-white px-4 py-2 rounded-lg hover:bg-[#065637]/90 transition-all transform hover:scale-105">
+						<a
+							href="https://play.google.com/store/apps/details?id=com.tradeet.vendor&hl=en&pli=1"
+							className="bg-[#065637] text-white px-4 py-2 rounded-lg hover:bg-[#065637]/90 transition-all transform hover:scale-105"
+						>
 							Get Started Free
-						</button>
+						</a>
 					</div>
 
 					{/* Mobile Menu Button */}
